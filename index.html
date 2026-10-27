@@ -1,0 +1,3794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IRCTC Post-Chart Seat & Berth Availability Portal | Fast-Track Edition</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            irctc: {
+              navy: '#081730',
+              deep: '#040d1d',
+              blue: '#133468',
+              saffron: '#f97316',
+              saffronDark: '#ea580c',
+              gold: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbars & Authentic Coach Aesthetics */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    .coach-shell {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 3px solid #1e293b;
+      border-radius: 20px;
+      position: relative;
+      box-shadow: 0 14px 32px -12px rgba(15, 23, 42, 0.2), inset 0 2px 4px rgba(255,255,255,0.9);
+    }
+
+    .berth-btn {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .berth-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      z-index: 10;
+    }
+    .berth-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* Pulse indicator for live chart */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0.85; }
+      80%, 100% { transform: scale(2.3); opacity: 0; }
+    }
+    .live-dot::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background-color: #10b981;
+      animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+
+    /* Subtle diagonal stripe for booked berths */
+    .booked-pattern {
+      background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(225, 29, 72, 0.08),
+        rgba(225, 29, 72, 0.08) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+    }
+
+    .fast-track-glow {
+      box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.35), 0 12px 30px -8px rgba(249, 115, 22, 0.2);
+    }
+
+    /* Searchable Station Combobox Dropdown Styling */
+    .station-suggest-panel {
+      max-height: 340px;
+      overflow-y: auto;
+      box-shadow: 0 20px 38px -10px rgba(8, 23, 48, 0.32), 0 0 0 1px rgba(15, 23, 42, 0.12);
+    }
+    .suggest-item-active {
+      background-color: #fff7ed !important;
+      border-left: 3px solid #f97316;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-orange-500 selection:text-white">
+
+  <!-- TOP OFFICIAL TRICOLOR ACCENT BAR -->
+  <div class="h-1.5 w-full bg-gradient-to-r from-orange-500 via-white to-emerald-600"></div>
+
+  <!-- HEADER NAVBAR -->
+  <header class="bg-irctc-navy text-white shadow-xl sticky top-0 z-30 border-b border-slate-700/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-md border border-orange-300/30 shrink-0">
+          <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="3" width="16" height="15" rx="3" />
+            <path d="M4 11h16" />
+            <path d="M12 3v8" />
+            <circle cx="8.5" cy="14.5" r="1.2" fill="currentColor" />
+            <circle cx="15.5" cy="14.5" r="1.2" fill="currentColor" />
+            <path d="M7 18l-2 3M17 18l2 3M6 20h12" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded bg-orange-500 text-white shadow-2xs">
+              FAST-TRACK EDITION
+            </span>
+            <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700">
+              CRIS / HHT CHART ENGINE
+            </span>
+            <span class="hidden sm:inline-flex items-center gap-1.5 text-xs text-emerald-300 font-medium">
+              <span class="relative flex h-2 w-2 live-dot">
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+              </span>
+              <span id="engineModeIndicator">Smart Chart Engine Active</span>
+            </span>
+          </div>
+          <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white mt-0.5">
+            IRCTC Post-Chart Seat &amp; Berth Availability Portal
+          </h1>
+        </div>
+      </div>
+
+      <!-- Right Actions: Clock, Download HTML & Host/API Settings -->
+      <div class="flex flex-wrap items-center gap-2.5 ml-auto">
+        <div class="hidden xl:flex flex-col items-end text-right bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-700/80">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Railway Server Time (IST)</span>
+          <span id="liveClock" class="text-xs font-mono font-semibold text-amber-300">27 Oct 2026 | 22:03:00 IST</span>
+        </div>
+
+        <button
+          onclick="downloadStandalonePortal()"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition cursor-pointer"
+          title="Download Single-File HTML to host on Vercel, Netlify, GitHub Pages, or cPanel"
+        >
+          <i class="fa-solid fa-download"></i>
+          <span class="hidden sm:inline">Download HTML</span>
+        </button>
+
+        <button
+          onclick="openHostModal()"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 shadow-sm transition cursor-pointer"
+        >
+          <i class="fa-solid fa-server text-orange-400"></i>
+          <span>Host Online / API Settings</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN PORTAL CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- 1. TRAIN NUMBER + JOURNEY DATE SEARCH ENGINE -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-visible">
+      <div class="bg-gradient-to-r from-irctc-navy via-irctc-blue to-irctc-navy px-5 py-3.5 rounded-t-2xl flex flex-wrap items-center justify-between gap-2 text-white">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-train-tram text-orange-400"></i>
+          <h2 class="text-sm sm:text-base font-extrabold tracking-wide">
+            1. Train Number, Date &amp; Route Stopping Junctions Search
+          </h2>
+        </div>
+        <span class="text-xs text-slate-200 font-medium">
+          Shows <strong class="text-amber-300">Only Stopping Junctions on Selected Train's Route</strong> (Origin <i class="fa-solid fa-arrow-right mx-0.5 text-[10px]"></i> Halts <i class="fa-solid fa-arrow-right mx-0.5 text-[10px]"></i> Destination)
+        </span>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Quick-Select Sample Train Chips (Including 15910 Avadh Assam & NJP Corridor) -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mr-1">
+            <i class="fa-solid fa-bolt text-orange-500 mr-1"></i>Popular &amp; NJP Route Presets:
+          </span>
+          <button onclick="selectPresetTrain('15910')" id="chip-15910" class="train-chip px-2.5 py-1 rounded-full text-xs font-semibold transition border cursor-pointer">
+            15910 Avadh Assam Exp (via NJP)
+          </button>
+          <button onclick="selectPresetTrain('12424')" id="chip-12424" class="train-chip px-2.5 py-1 rounded-full text-xs font-semibold transition border cursor-pointer">
+            12424 DBRG Rajdhani (via NJP)
+          </button>
+          <button onclick="selectPresetTrain('12506')" id="chip-12506" class="train-chip px-2.5 py-1 rounded-full text-xs font-semibold transition border cursor-pointer">
+            12506 North East Exp (via NJP)
+          </button>
+          <button onclick="selectPresetTrain('22301')" id="chip-22301" class="train-chip px-2.5 py-1 rounded-full text-xs font-semibold transition border cursor-pointer">
+            22301 HWH-NJP Vande Bharat
+          </button>
+          <button onclick="selectPresetTrain('12951')" id="chip-12951" class="train-chip px-2.5 py-1 rounded-full text-xs font-semibold transition border cursor-pointer">
+            12951 Mumbai Rajdhani
+          </button>
+          <button onclick="selectPresetTrain('22436')" id="chip-22436" class="train-chip px-2.5 py-1 rounded-full text-xs font-semibold transition border cursor-pointer">
+            22436 NDLS-BSB Vande Bharat
+          </button>
+          <button onclick="selectPresetTrain('12301')" id="chip-12301" class="train-chip px-2.5 py-1 rounded-full text-xs font-semibold transition border cursor-pointer">
+            12301 Howrah Rajdhani
+          </button>
+        </div>
+
+        <!-- Search Form Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 pt-1 items-end">
+          <!-- Any 5-Digit Train Number Input + Datalist -->
+          <div class="lg:col-span-2">
+            <label for="trainNumberInput" class="block text-xs font-extrabold uppercase text-slate-600 mb-1.5">
+              Train No. <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <i class="fa-solid fa-hashtag absolute left-3 top-1/2 -translate-y-1/2 text-orange-500 text-xs"></i>
+              <input
+                type="text"
+                id="trainNumberInput"
+                list="trainPresetsList"
+                maxlength="5"
+                value="12424"
+                placeholder="e.g. 12424"
+                onkeydown="if(event.key==='Enter') executeTrainDateSearch(true)"
+                class="w-full pl-8 pr-16 py-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-sm font-mono font-extrabold text-irctc-navy focus:outline-none focus:border-orange-500 focus:bg-white transition"
+              />
+              <span id="trainTypeBadge" class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                EXPRESS
+              </span>
+              <datalist id="trainPresetsList">
+                <option value="15910">15910 - Lalgarh - Dibrugarh Avadh Assam Exp (via NJP)</option>
+                <option value="12424">12424 - New Delhi - Dibrugarh Rajdhani Exp (via NJP)</option>
+                <option value="12506">12506 - Anand Vihar - Kamakhya North East Exp (via NJP)</option>
+                <option value="22301">22301 - Howrah - New Jalpaiguri (NJP) Vande Bharat Exp</option>
+                <option value="12951">12951 - Mumbai Central - New Delhi Tejas Rajdhani</option>
+                <option value="22436">22436 - New Delhi - Varanasi Vande Bharat Exp</option>
+                <option value="12627">12627 - KSR Bengaluru - New Delhi Karnataka Exp</option>
+                <option value="12002">12002 - New Delhi - Bhopal Shatabdi Exp</option>
+                <option value="12301">12301 - Howrah - New Delhi Rajdhani Exp</option>
+              </datalist>
+            </div>
+          </div>
+
+          <!-- Journey Date Selector -->
+          <div class="lg:col-span-2">
+            <label for="journeyDate" class="block text-xs font-extrabold uppercase text-slate-600 mb-1.5">
+              Journey Date <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              id="journeyDate"
+              onchange="executeTrainDateSearch(true)"
+              class="w-full px-3 py-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:border-orange-500 focus:bg-white transition"
+            />
+          </div>
+
+          <!-- Searchable + Manual Type "FROM (BOARDING)" Combobox -->
+          <div class="lg:col-span-3 relative" id="fromComboboxWrapper">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="fromStationInput" class="block text-xs font-extrabold uppercase text-slate-600">
+                From (Boarding Junction)
+              </label>
+              <span class="text-[10px] font-semibold text-emerald-700" id="fromStopsCountLabel">Route Stops Only</span>
+            </div>
+            <div class="relative flex items-center">
+              <i class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 text-xs pointer-events-none"></i>
+              <input
+                type="text"
+                id="fromStationInput"
+                autocomplete="off"
+                placeholder="Type or select boarding junction..."
+                onfocus="openStationCombobox('FROM')"
+                oninput="onStationComboboxInput('FROM', this.value)"
+                onkeydown="handleStationComboboxKeydown(event, 'FROM')"
+                class="w-full pl-8 pr-14 py-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-orange-500 focus:bg-white transition"
+              />
+              <button
+                type="button"
+                onclick="clearStationCombobox('FROM', event)"
+                title="Search Boarding Junctions on Route"
+                class="absolute right-7 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 px-1 cursor-pointer"
+              >
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+              <button
+                type="button"
+                onclick="toggleStationCombobox('FROM', event)"
+                title="Show train stopping junctions"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-orange-600 px-1 cursor-pointer"
+              >
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </button>
+            </div>
+            <!-- Hidden native select kept synced for compatibility -->
+            <select id="boardingStation" class="hidden"></select>
+
+            <!-- Auto-Suggest Dropdown Panel for FROM -->
+            <div
+              id="fromSuggestDropdown"
+              class="hidden station-suggest-panel absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl border border-slate-300 z-50 divide-y divide-slate-100"
+            ></div>
+          </div>
+
+          <!-- Swap From & To Button + Searchable "TO (DESTINATION)" Combobox -->
+          <div class="lg:col-span-3 relative" id="toComboboxWrapper">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onclick="swapFromAndToStations()"
+                  title="Reverse Route Direction (Swap Origin & Destination)"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200 hover:bg-orange-500 hover:text-white text-slate-700 text-[10px] font-extrabold transition cursor-pointer"
+                >
+                  <i class="fa-solid fa-right-left"></i>
+                  <span>Swap</span>
+                </button>
+                <label for="toStationInput" class="block text-xs font-extrabold uppercase text-slate-600">
+                  To (Stopping Junction)
+                </label>
+              </div>
+              <span class="text-[10px] font-semibold text-blue-700" id="toStopsCountLabel">Onward Halts Only</span>
+            </div>
+            <div class="relative flex items-center">
+              <i class="fa-solid fa-flag-checkered absolute left-3 top-1/2 -translate-y-1/2 text-orange-500 text-xs pointer-events-none"></i>
+              <input
+                type="text"
+                id="toStationInput"
+                autocomplete="off"
+                placeholder="Type or select destination junction..."
+                onfocus="openStationCombobox('TO')"
+                oninput="onStationComboboxInput('TO', this.value)"
+                onkeydown="handleStationComboboxKeydown(event, 'TO')"
+                class="w-full pl-8 pr-14 py-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-orange-500 focus:bg-white transition"
+              />
+              <button
+                type="button"
+                onclick="clearStationCombobox('TO', event)"
+                title="Search Onward Stopping Junctions"
+                class="absolute right-7 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 px-1 cursor-pointer"
+              >
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+              <button
+                type="button"
+                onclick="toggleStationCombobox('TO', event)"
+                title="Show onward train stopping junctions"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-orange-600 px-1 cursor-pointer"
+              >
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </button>
+            </div>
+            <!-- Hidden native select kept synced for compatibility -->
+            <select id="destinationStation" class="hidden"></select>
+
+            <!-- Auto-Suggest Dropdown Panel for TO -->
+            <div
+              id="toSuggestDropdown"
+              class="hidden station-suggest-panel absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl border border-slate-300 z-50 divide-y divide-slate-100"
+            ></div>
+          </div>
+
+          <!-- Fetch Chart CTA -->
+          <div class="lg:col-span-2">
+            <button
+              onclick="executeTrainDateSearch(true)"
+              class="w-full py-2.5 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold text-sm rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <i class="fa-solid fa-bolt" id="syncIcon"></i>
+              <span>Check Chart</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- DYNAMIC CHART PREPARATION STATUS & INTERACTIVE ROUTE TIMELINE BANNER -->
+        <div class="mt-3 pt-3.5 border-t border-slate-200/80 flex flex-col gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <!-- Dynamic Chart Status Badges -->
+            <div class="flex flex-wrap items-center gap-2" id="chartStatusBannerContainer">
+              <!-- Populated dynamically based on selected Date & Train -->
+            </div>
+
+            <!-- Active Train Title & Seed Info -->
+            <div class="flex items-center gap-2 text-xs font-mono text-slate-600">
+              <span id="activeTrainFullTitle" class="font-extrabold text-irctc-navy">12424 - NEW DELHI - DIBRUGARH RAJDHANI EXP</span>
+              <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-bold" id="dateParityBadge">ODD DATE CHART</span>
+            </div>
+          </div>
+
+          <!-- Interactive Route Stops Visualizer Strip -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200/70">
+            <div class="flex items-center gap-1.5 overflow-x-auto py-1 text-xs" id="routeStopsStrip">
+              <!-- Dynamically populated interactive station pills -->
+            </div>
+            <div class="shrink-0 flex items-center gap-2">
+              <span class="text-[11px] font-extrabold text-irctc-navy bg-orange-100 border border-orange-300 px-2.5 py-1 rounded-lg" id="selectedSegmentLabel">
+                Checking Segment: Full Route
+              </span>
+              <button
+                type="button"
+                onclick="resetRouteSegmentToFull()"
+                class="text-[11px] font-bold text-blue-700 hover:text-orange-600 underline cursor-pointer"
+                title="Reset From/To to full train route"
+              >
+                Full Route
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. FAST-TRACK SEAT & BERTH CHECKER (INSTANT LOOKUP <50ms) -->
+    <section class="bg-gradient-to-br from-irctc-navy via-slate-900 to-irctc-deep text-white rounded-2xl p-5 fast-track-glow border border-orange-500/40 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-400/40 flex items-center justify-center text-orange-400 shrink-0">
+            <i class="fa-solid fa-gauge-high text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm sm:text-base font-extrabold tracking-wide text-white">
+                2. Fast-Track Instant Seat &amp; Berth Checker
+              </h2>
+              <span id="fastTrackLatencyBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                ⚡ 0.8 ms Lookup
+              </span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Select or type any Coach &amp; Seat/Berth Number (1–72) to verify whether it is <strong class="text-emerald-400">AVAILABLE</strong> or <strong class="text-rose-400">BOOKED</strong> for your journey
+            </p>
+          </div>
+        </div>
+
+        <!-- Fast-Track 1-Click Quick Filters -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            onclick="triggerFastQuickFilter('LOWER_AVAILABLE')"
+            id="ftPillLower"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 transition cursor-pointer flex items-center gap-1.5"
+          >
+            <i class="fa-solid fa-bed"></i>
+            <span>Instant Lower Berths (<span id="ftLowerCount">0</span>)</span>
+          </button>
+          <button
+            onclick="triggerFastQuickFilter('FULL_VACANT')"
+            id="ftPillFull"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 transition cursor-pointer flex items-center gap-1.5"
+          >
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Full-Route Vacant (<span id="ftFullCount">0</span>)</span>
+          </button>
+          <button
+            onclick="toggleSplitChainPanel()"
+            id="ftPillChain"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 transition cursor-pointer flex items-center gap-1.5"
+          >
+            <i class="fa-solid fa-link"></i>
+            <span>Split-Seat Smart Chain (<span id="ftChainCount">0</span>)</span>
+          </button>
+          <button
+            onclick="toggleRatioBar()"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer flex items-center gap-1.5"
+          >
+            <i class="fa-solid fa-chart-pie text-orange-400"></i>
+            <span>Booked vs Available Ratio</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Booked vs Available Train Ratio Bar (Toggleable, visible by default) -->
+      <div id="ratioSummaryBox" class="bg-slate-900/90 rounded-xl p-3.5 border border-slate-800 space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span class="font-bold text-slate-300">
+            <i class="fa-solid fa-chart-simple text-orange-400 mr-1.5"></i>Entire Train Post-Chart Seat Occupancy Breakdown:
+          </span>
+          <div class="flex flex-wrap items-center gap-4 font-mono font-bold">
+            <span class="text-emerald-400">● Available: <span id="ratioAvailCount">0</span> (<span id="ratioAvailPct">0%</span>)</span>
+            <span class="text-amber-400">● Partial Split: <span id="ratioPartialCount">0</span> (<span id="ratioPartialPct">0%</span>)</span>
+            <span class="text-rose-400">● Booked: <span id="ratioBookedCount">0</span> (<span id="ratioBookedPct">0%</span>)</span>
+          </div>
+        </div>
+        <div class="w-full h-3 rounded-full bg-slate-800 overflow-hidden flex p-0.5 gap-0.5">
+          <div id="ratioBarAvail" class="h-full bg-emerald-500 rounded-l-full transition-all duration-300" style="width: 15%"></div>
+          <div id="ratioBarPartial" class="h-full bg-amber-500 transition-all duration-300" style="width: 12%"></div>
+          <div id="ratioBarBooked" class="h-full bg-rose-600 rounded-r-full transition-all duration-300" style="width: 73%"></div>
+        </div>
+      </div>
+
+      <!-- Split-Seat Smart Chain Drawer (Hidden until clicked) -->
+      <div id="splitChainDrawer" class="hidden bg-slate-900/95 rounded-xl p-4 border border-amber-500/40 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xs sm:text-sm font-extrabold text-amber-300 flex items-center gap-2">
+              <i class="fa-solid fa-link"></i>
+              <span>Split-Seat Smart Chain Finder (Complete Journey Using 2 Partial Berths)</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">
+              When no single seat is vacant for the whole journey, book or request TTE allotment for these chained berth pairs at the intermediate handover station:
+            </p>
+          </div>
+          <button onclick="toggleSplitChainPanel()" class="text-slate-400 hover:text-white text-xs cursor-pointer">
+            <i class="fa-solid fa-xmark text-base"></i>
+          </button>
+        </div>
+        <div id="splitChainCardsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Instant Lookup Controls + Instant Verdict Result Card -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        <!-- Left Input Controls (4 Cols) -->
+        <div class="lg:col-span-4 bg-slate-800/80 rounded-xl p-4 border border-slate-700/80 flex flex-col justify-between space-y-3">
+          <div class="text-xs font-extrabold uppercase tracking-wider text-orange-400 flex items-center justify-between">
+            <span>Enter Coach &amp; Seat Number</span>
+            <span class="text-[10px] text-slate-400 font-mono">Instant Check</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Coach Picker -->
+            <div>
+              <label for="fastCoachSelect" class="block text-[11px] font-bold text-slate-300 mb-1">Coach ID</label>
+              <select
+                id="fastCoachSelect"
+                onchange="handleFastCoachChange(this.value)"
+                class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-600 text-white font-mono font-extrabold text-sm focus:outline-none focus:border-orange-500"
+              ></select>
+            </div>
+
+            <!-- Seat / Berth Number Input + Stepper -->
+            <div>
+              <label for="fastSeatInput" class="block text-[11px] font-bold text-slate-300 mb-1">
+                Seat / Berth # <span id="fastMaxSeatHint" class="text-slate-400 font-mono">(1–72)</span>
+              </label>
+              <div class="flex items-center">
+                <button
+                  onclick="stepFastSeat(-1)"
+                  class="px-2.5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-l-xl border border-slate-600 font-bold cursor-pointer"
+                >-</button>
+                <input
+                  type="number"
+                  id="fastSeatInput"
+                  min="1"
+                  max="72"
+                  value="1"
+                  oninput="handleFastSeatInput(this.value)"
+                  class="w-full py-2.5 text-center bg-slate-900 border-y border-slate-600 text-amber-300 font-mono font-extrabold text-sm focus:outline-none"
+                />
+                <button
+                  onclick="stepFastSeat(1)"
+                  class="px-2.5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-r-xl border border-slate-600 font-bold cursor-pointer"
+                >+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next Available Seat Finder Button -->
+          <div class="pt-1 flex items-center gap-2">
+            <button
+              onclick="jumpToNextVacantInCoach()"
+              class="w-full py-2 px-3 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <i class="fa-solid fa-forward-fast"></i>
+              <span>Jump to Next Available Seat in Coach</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Instant Verdict Card (8 Cols) -->
+        <div id="fastVerdictCard" class="lg:col-span-8 bg-slate-900/90 rounded-xl p-4 border-2 border-slate-700 flex flex-col justify-between">
+          <!-- Dynamically populated in <50ms -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CLASS-WISE POST-CHART VACANCY & BOOKED SUMMARY CARDS -->
+    <section class="space-y-2.5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-700">
+            3. Class-Wise Available vs Booked Summary
+          </h3>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 font-semibold">
+            Click any class to filter coaches &amp; seat list
+          </span>
+        </div>
+        <button
+          onclick="selectClassFilter('ALL')"
+          id="resetClassBtn"
+          class="text-xs font-bold text-blue-700 hover:text-orange-600 transition flex items-center gap-1 cursor-pointer"
+        >
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Show All Classes Combined</span>
+        </button>
+      </div>
+
+      <!-- 6 Interactive Class Cards: 1A, 2A, 3A, 3E, SL, CC -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="classSummaryGrid">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- 4. INTERACTIVE DUAL VIEW (VISUAL COACH DIAGRAM + COMPLETE SEAT STATUS TABLE) -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <!-- Top Rake / Coach Selector Strip -->
+      <div class="bg-slate-900 text-white p-4 border-b border-slate-800">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded bg-orange-500 text-white text-xs font-extrabold uppercase tracking-wider">
+              Live Rake Coaches
+            </span>
+            <h3 class="text-sm font-bold text-slate-200" id="activeTrainHeaderLabel">
+              Select any Coach to view Booked vs Available Seats
+            </h3>
+          </div>
+          <div class="flex flex-wrap items-center gap-4 text-xs text-slate-300">
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block border border-emerald-300"></span>
+              Available (Selected Route)
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-amber-500 inline-block border border-amber-300"></span>
+              Partial Segment Available
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-rose-600 inline-block border border-rose-400"></span>
+              Booked / Occupied
+            </span>
+          </div>
+        </div>
+
+        <!-- Horizontal Scrollable Rake Coaches -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5" id="coachSelectorStrip">
+          <!-- Dynamically populated Locomotive + Coach Buttons with Avail/Booked Badges -->
+        </div>
+      </div>
+
+      <!-- View Mode Tabs & Global Filter Controls Bar -->
+      <div class="bg-slate-50 px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+        <!-- View Switcher Buttons -->
+        <div class="inline-flex rounded-xl p-1 bg-slate-200/80 border border-slate-300/80">
+          <button
+            onclick="switchPortalView('visual')"
+            id="tabBtnVisual"
+            class="px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer bg-irctc-navy text-white shadow-sm"
+          >
+            <i class="fa-solid fa-border-all"></i>
+            <span>Visual Coach Diagram</span>
+          </button>
+          <button
+            onclick="switchPortalView('table')"
+            id="tabBtnTable"
+            class="px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer text-slate-700 hover:text-slate-900"
+          >
+            <i class="fa-solid fa-table-list"></i>
+            <span>Complete Seat Status Table</span>
+            <span id="tableCountBadge" class="px-2 py-0.5 text-[11px] rounded-full bg-orange-500 text-white font-mono">0</span>
+          </button>
+        </div>
+
+        <!-- Global Berth & Status Filter Controls -->
+        <div class="flex flex-wrap items-center gap-2.5 flex-1 justify-end">
+          <!-- Berth Type Filter -->
+          <div class="flex items-center gap-1.5">
+            <label for="filterBerthType" class="text-xs font-bold text-slate-500 uppercase">Berth:</label>
+            <select
+              id="filterBerthType"
+              onchange="applyFilters()"
+              class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="ALL">All Berth Types</option>
+              <option value="LB">LB - Lower Berth Only</option>
+              <option value="MB">MB - Middle Berth</option>
+              <option value="UB">UB - Upper Berth</option>
+              <option value="SL">SL - Side Lower</option>
+              <option value="SU">SU - Side Upper</option>
+              <option value="WS">WS - Window Seat (CC)</option>
+              <option value="AS">AS - Aisle Seat (CC)</option>
+            </select>
+          </div>
+
+          <!-- Vacancy / Booked Status Filter -->
+          <div class="flex items-center gap-1.5">
+            <label for="filterVacancyType" class="text-xs font-bold text-slate-500 uppercase">Status:</label>
+            <select
+              id="filterVacancyType"
+              onchange="applyFilters()"
+              class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="ALL">Show All (Available + Booked)</option>
+              <option value="VACANT_ANY">All Available (Full + Partial)</option>
+              <option value="FULL">Available for Selected Journey</option>
+              <option value="PARTIAL">Partial Segment Available Only</option>
+              <option value="BOOKED">Booked / Occupied Only</option>
+            </select>
+          </div>
+
+          <!-- Quick Search Input -->
+          <div class="relative w-44 sm:w-52">
+            <i class="fa-solid fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input
+              type="text"
+              id="searchBerthInput"
+              oninput="applyFilters()"
+              placeholder="Seat #, coach, station..."
+              class="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 1: VISUAL INDIAN RAILWAYS COACH BERTH DIAGRAM + SIDE INSPECTOR -->
+      <div id="viewVisualContainer" class="p-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Left/Main Area: Visual Coach Layout -->
+        <div class="lg:col-span-8 space-y-4">
+          <!-- Coach Info Header Banner -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-100 px-4 py-3 rounded-xl border border-slate-200">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-irctc-navy text-white flex flex-col items-center justify-center font-mono font-bold shadow">
+                <span class="text-base leading-none" id="currentCoachIdLabel">B1</span>
+                <span class="text-[10px] text-orange-300" id="currentCoachClassLabel">3A</span>
+              </div>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h4 class="font-extrabold text-slate-800 text-base" id="currentCoachTitle">
+                    Coach B1 — AC 3 Tier (72 Berths)
+                  </h4>
+                  <span id="currentCoachLayoutTag" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
+                    8-Berth Bay Architecture
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Click any seat to inspect its station-by-station Booked vs Available chart status.
+                </p>
+              </div>
+            </div>
+
+            <!-- Coach Vacancy & Booked Quick Pills -->
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="px-3 py-1.5 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-bold">
+                Available: <span id="coachFullVacantCount" class="font-mono">0</span>
+              </div>
+              <div class="px-3 py-1.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold">
+                Partial: <span id="coachPartialVacantCount" class="font-mono">0</span>
+              </div>
+              <div class="px-3 py-1.5 rounded-lg bg-rose-100 border border-rose-300 text-rose-900 text-xs font-bold">
+                Booked: <span id="coachBookedCount" class="font-mono">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Realistic Coach Blueprint Shell -->
+          <div class="coach-shell p-4 sm:p-5 overflow-x-auto max-h-[780px] overflow-y-auto">
+            <!-- Top Entry/Exit Door & Bio-Toilets Bar -->
+            <div class="flex items-center justify-between gap-2 pb-3 mb-4 border-b-2 border-dashed border-slate-300 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <div class="flex items-center gap-2 bg-slate-200/90 px-3 py-1 rounded-md border border-slate-300">
+                <i class="fa-solid fa-door-open text-slate-600"></i>
+                <span>Vestibule / Entry Door (Front)</span>
+              </div>
+              <div class="hidden sm:flex items-center gap-1 text-slate-400">
+                <i class="fa-solid fa-arrows-left-right"></i>
+                <span>Corridor / Gangway</span>
+              </div>
+              <div class="flex items-center gap-2 bg-slate-200/90 px-3 py-1 rounded-md border border-slate-300">
+                <i class="fa-solid fa-restroom text-slate-600"></i>
+                <span>Bio-Vacuum Lavatory 1 &amp; 2</span>
+              </div>
+            </div>
+
+            <!-- Dynamic Bays Container -->
+            <div id="visualCoachBaysContainer" class="space-y-3">
+              <!-- Populated dynamically based on Coach Class -->
+            </div>
+
+            <!-- Bottom Entry/Exit Door & Attendant Cabin Bar -->
+            <div class="flex items-center justify-between gap-2 pt-3 mt-4 border-t-2 border-dashed border-slate-300 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <div class="flex items-center gap-2 bg-slate-200/90 px-3 py-1 rounded-md border border-slate-300">
+                <i class="fa-solid fa-user-tie text-slate-600"></i>
+                <span>Attendant / Linen Bay</span>
+              </div>
+              <div class="flex items-center gap-2 bg-slate-200/90 px-3 py-1 rounded-md border border-slate-300">
+                <i class="fa-solid fa-restroom text-slate-600"></i>
+                <span>Bio-Lavatory 3 &amp; 4 / Rear Door</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Area: Detailed Berth Segment Inspector & Booking Panel -->
+        <div class="lg:col-span-4 lg:sticky lg:top-20">
+          <div id="berthInspectorCard" class="bg-slate-50 rounded-2xl border-2 border-slate-200 shadow-sm overflow-hidden">
+            <!-- Dynamically updated when user clicks a berth -->
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: COMPLETE SEAT STATUS TABLE (BOOKED + AVAILABLE + PARTIAL) -->
+      <div id="viewTableContainer" class="hidden p-5 space-y-4">
+        <!-- Extra Table Filter & Export Bar -->
+        <div class="bg-slate-100 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-500">Scope</label>
+              <select id="tableScopeFilter" onchange="renderVacancyTable()" class="mt-0.5 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800">
+                <option value="ACTIVE_COACH">Active Coach Only</option>
+                <option value="ALL_COACHES">All Coaches in Train</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-500">Vacant From Stop</label>
+              <select id="tableFromStationFilter" onchange="renderVacancyTable()" class="mt-0.5 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800">
+                <option value="ALL">Any Stop</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-500">Vacant Up To Stop</label>
+              <select id="tableToStationFilter" onchange="renderVacancyTable()" class="mt-0.5 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800">
+                <option value="ALL">Any Stop</option>
+              </select>
+            </div>
+            <div class="pt-3.5">
+              <button onclick="resetAllFilters()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition cursor-pointer">
+                <i class="fa-solid fa-filter-circle-xmark mr-1 text-orange-500"></i>Reset Filters
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="exportChartCsv()" class="px-3.5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+              <i class="fa-solid fa-file-csv"></i>
+              <span>Export CSV</span>
+            </button>
+            <button onclick="copyVacantTableReport()" class="px-3.5 py-2 rounded-lg bg-irctc-navy hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+              <i class="fa-regular fa-copy text-orange-400"></i>
+              <span>Copy Chart Report</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Responsive Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-xs bg-white max-h-[640px] overflow-y-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="sticky top-0 z-10">
+              <tr class="bg-slate-800 text-white text-[11px] font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Coach</th>
+                <th class="py-3 px-4">Seat / Berth</th>
+                <th class="py-3 px-4">Berth Type</th>
+                <th class="py-3 px-4">Status (Selected Route)</th>
+                <th class="py-3 px-4">Available Segment(s)</th>
+                <th class="py-3 px-4">Booked Segment(s)</th>
+                <th class="py-3 px-4">Est. Current Fare</th>
+                <th class="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="vacancyTableBody" class="divide-y divide-slate-200 text-xs sm:text-sm">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-irctc-deep text-slate-400 text-xs border-t border-slate-800 mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+        <span class="font-bold text-slate-200">IRCTC Post-Chart Seat &amp; Berth Availability Portal (Fast-Track Edition)</span>
+        <span class="hidden md:inline">• Ready for Online Hosting (Vercel / Netlify / GitHub Pages / cPanel)</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-4">
+        <button onclick="downloadStandalonePortal()" class="text-emerald-400 hover:underline font-semibold cursor-pointer">
+          <i class="fa-solid fa-download mr-1"></i>Download index.html
+        </button>
+        <span>•</span>
+        <button onclick="openHostModal()" class="text-amber-400 hover:underline font-semibold cursor-pointer">
+          Host Online &amp; Live API Config
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL 1: BOOKING / TTE ALLOTMENT SLIP MODAL -->
+  <div id="actionModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-irctc-navy text-white px-5 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-ticket text-orange-400 text-lg"></i>
+          <h3 id="actionModalTitle" class="font-extrabold text-base">Post-Chart Seat Action</h3>
+        </div>
+        <button onclick="closeActionModal()" class="text-slate-300 hover:text-white w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div id="actionModalBody" class="p-5 space-y-4 text-sm">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: HOST ONLINE / LIVE API CONFIGURATION & CUSTOM JSON MODAL -->
+  <div id="hostModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- Modal Header -->
+      <div class="bg-irctc-navy text-white px-6 py-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-lg bg-orange-500/20 border border-orange-400/40 flex items-center justify-center text-orange-400">
+            <i class="fa-solid fa-server"></i>
+          </span>
+          <div>
+            <h3 class="font-extrabold text-base">Host Portal Online &amp; Live API Endpoint Settings</h3>
+            <p class="text-xs text-slate-300">Deploy this single-page portal anywhere or connect your live RapidAPI / CRIS proxy</p>
+          </div>
+        </div>
+        <button onclick="closeHostModal()" class="text-slate-300 hover:text-white w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Tabs -->
+      <div class="bg-slate-100 px-6 py-2.5 border-b border-slate-200 flex flex-wrap items-center gap-2 shrink-0">
+        <button
+          onclick="switchHostModalTab('deploy')"
+          id="hostTabDeployBtn"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-irctc-navy text-white transition cursor-pointer"
+        >
+          <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>1. One-Click Hosting &amp; Export
+        </button>
+        <button
+          onclick="switchHostModalTab('api')"
+          id="hostTabApiBtn"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-200 transition cursor-pointer"
+        >
+          <i class="fa-solid fa-plug mr-1.5"></i>2. Live API / RapidAPI Proxy Config
+        </button>
+        <button
+          onclick="switchHostModalTab('json')"
+          id="hostTabJsonBtn"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-200 transition cursor-pointer"
+        >
+          <i class="fa-solid fa-code mr-1.5"></i>3. Import Custom Chart JSON
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <!-- Tab 1: One-Click Hosting & Deployment -->
+        <div id="hostTabDeployContent" class="space-y-4">
+          <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="text-sm font-extrabold text-emerald-950 flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                <span>100% Production-Ready Single-File Architecture</span>
+              </div>
+              <p class="text-xs text-emerald-800">
+                This portal has zero build steps or external local dependencies. Download <code class="font-mono font-bold">index.html</code> and upload it directly to any static host or web server.
+              </p>
+            </div>
+            <button
+              onclick="downloadStandalonePortal()"
+              class="shrink-0 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+            >
+              <i class="fa-solid fa-download"></i>
+              <span>Download index.html</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+              <div class="font-extrabold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt text-orange-500"></i>
+                <span>Netlify Drop (30 Secs)</span>
+              </div>
+              <p class="text-slate-600">Go to <span class="font-mono font-semibold">app.netlify.com/drop</span> and drag the downloaded folder containing <code class="font-mono">index.html</code> for an instant HTTPS URL.</p>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+              <div class="font-extrabold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-brands fa-github text-slate-800"></i>
+                <span>GitHub Pages / Vercel</span>
+              </div>
+              <p class="text-slate-600">Commit <code class="font-mono">index.html</code> to a GitHub repository and enable GitHub Pages or import into Vercel with zero configuration.</p>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+              <div class="font-extrabold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-globe text-blue-600"></i>
+                <span>cPanel / Custom Domain</span>
+              </div>
+              <p class="text-slate-600">Upload <code class="font-mono">index.html</code> into your <code class="font-mono">public_html/</code> directory on Hostinger, GoDaddy, or AWS S3.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Live API Endpoint / RapidAPI Config -->
+        <div id="hostTabApiContent" class="hidden space-y-4">
+          <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 space-y-1">
+            <div class="font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-plug-circle-bolt text-blue-600"></i>
+              <span>Hybrid Data Engine (Live API Endpoint + Deterministic Fallback)</span>
+            </div>
+            <p>
+              Configure your backend proxy URL or RapidAPI endpoint below. Settings are saved in <code class="font-mono font-bold">localStorage</code>. If the live endpoint is blank or unreachable, the portal seamlessly falls back to the built-in deterministic chart engine.
+            </p>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Data Engine Mode</label>
+              <select id="apiEngineModeSelect" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 font-semibold text-slate-800">
+                <option value="SMART_ENGINE">Built-in Deterministic Smart Engine (Works for Any 5-Digit Train &amp; Date)</option>
+                <option value="CUSTOM_API">Live Custom Proxy / RapidAPI Endpoint (With Automatic Fallback)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Live Chart Proxy Endpoint URL (POST or GET)</label>
+              <input
+                type="url"
+                id="apiEndpointUrlInput"
+                placeholder="https://your-worker.workers.dev/api/irctc-chart-vacancy"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-slate-800"
+              />
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Optional API Key / RapidAPI Header (`x-rapidapi-key`)</label>
+              <input
+                type="password"
+                id="apiKeyInput"
+                placeholder="Optional bearer or x-rapidapi-key token"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-slate-800"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2.5 pt-2">
+            <button onclick="saveApiConfig()" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-sm cursor-pointer">
+              <i class="fa-solid fa-floppy-disk mr-1.5"></i>Save API Configuration
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 3: Custom JSON Loader -->
+        <div id="hostTabJsonContent" class="hidden space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="text-xs text-slate-600">
+              Paste custom reservation chart JSON to override and render any train's coach and berth data:
+            </p>
+            <button
+              onclick="populateSampleCustomJson()"
+              class="text-xs font-bold text-orange-600 hover:text-orange-700 underline cursor-pointer"
+            >
+              Reset to Sample JSON Schema
+            </button>
+          </div>
+
+          <textarea
+            id="customJsonTextarea"
+            rows="10"
+            class="w-full p-3.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-xs border border-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          ></textarea>
+
+          <div id="jsonImportFeedback" class="hidden px-4 py-2.5 rounded-xl text-xs font-semibold"></div>
+
+          <div class="flex items-center justify-end gap-3 pt-1">
+            <button onclick="importCustomChartJson()" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold shadow-md transition cursor-pointer flex items-center gap-2">
+              <i class="fa-solid fa-bolt"></i>
+              <span>Parse &amp; Render Custom Chart JSON</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION BANNER -->
+  <div id="toastBanner" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center gap-3 text-xs font-semibold">
+    <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <span id="toastMessage">Copied to clipboard!</span>
+  </div>
+
+  <!-- PORTAL APPLICATION SCRIPT -->
+  <script>
+    /*************************************************************************
+     * 1. RAILWAY CLASS METADATA & AUTHENTIC COACH ARCHITECTURES
+     *************************************************************************/
+    const CLASS_META = {
+      '1A': { code: '1A', name: 'First AC', totalSeats: 24, layout: 'Lockable Cabins (4) & Coupes (2)', baseFarePerKm: 4.35 },
+      '2A': { code: '2A', name: 'AC 2 Tier', totalSeats: 48, layout: '6-Berth Bay (LB/UB + SL/SU)', baseFarePerKm: 2.60 },
+      '3A': { code: '3A', name: 'AC 3 Tier', totalSeats: 72, layout: '8-Berth Bay (LB/MB/UB + SL/SU)', baseFarePerKm: 1.85 },
+      '3E': { code: '3E', name: 'AC 3 Economy', totalSeats: 72, layout: '8-Berth LHB Economy Bay', baseFarePerKm: 1.65 },
+      'SL': { code: 'SL', name: 'Sleeper Class', totalSeats: 72, layout: '8-Berth Non-AC Sleeper Bay', baseFarePerKm: 0.78 },
+      'CC': { code: 'CC', name: 'AC Chair Car', totalSeats: 70, layout: '3x2 Executive Ergonomic Seating', baseFarePerKm: 1.55 }
+    };
+
+    const BERTH_TYPE_LABELS = {
+      'LB': { short: 'LB', full: 'Lower Berth', badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-300' },
+      'MB': { short: 'MB', full: 'Middle Berth', badgeClass: 'bg-purple-100 text-purple-800 border-purple-300' },
+      'UB': { short: 'UB', full: 'Upper Berth', badgeClass: 'bg-sky-100 text-sky-800 border-sky-300' },
+      'SL': { short: 'SL', full: 'Side Lower', badgeClass: 'bg-teal-100 text-teal-800 border-teal-300' },
+      'SU': { short: 'SU', full: 'Side Upper', badgeClass: 'bg-cyan-100 text-cyan-800 border-cyan-300' },
+      'WS': { short: 'WS', full: 'Window Seat', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+      'MS': { short: 'MS', full: 'Middle Seat', badgeClass: 'bg-slate-200 text-slate-800 border-slate-300' },
+      'AS': { short: 'AS', full: 'Aisle Seat', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' }
+    };
+
+    /*************************************************************************
+     * 2. BUILT-IN PRESET TRAINS + MASTER INDIAN RAILWAYS STATION DIRECTORY
+     *************************************************************************/
+    const MASTER_STATIONS_DB = [
+      { code: 'NJP',  name: 'New Jalpaiguri (Siliguri)', zone: 'NFR', sampleTrains: ['12424', '12506', '22301'] },
+      { code: 'SGUJ', name: 'Siliguri Junction', zone: 'NFR', sampleTrains: ['12424', '12506'] },
+      { code: 'KNE',  name: 'Kishanganj', zone: 'NFR', sampleTrains: ['12424', '12506', '22301'] },
+      { code: 'KIR',  name: 'Katihar Junction', zone: 'NFR', sampleTrains: ['12424', '12506'] },
+      { code: 'BJU',  name: 'Barauni Junction', zone: 'ECR', sampleTrains: ['12424', '12506'] },
+      { code: 'MLDT', name: 'Malda Town', zone: 'ER', sampleTrains: ['22301'] },
+      { code: 'BOE',  name: 'Barsoi Junction', zone: 'NFR', sampleTrains: ['22301'] },
+      { code: 'BHP',  name: 'Bolpur Shantiniketan', zone: 'ER', sampleTrains: ['22301'] },
+      { code: 'NCB',  name: 'New Cooch Behar', zone: 'NFR', sampleTrains: ['12424', '12506'] },
+      { code: 'NBQ',  name: 'New Bongaigaon', zone: 'NFR', sampleTrains: ['12424', '12506'] },
+      { code: 'RNY',  name: 'Rangiya Junction', zone: 'NFR', sampleTrains: ['12424'] },
+      { code: 'KYQ',  name: 'Kamakhya Junction', zone: 'NFR', sampleTrains: ['12506', '12424'] },
+      { code: 'GHY',  name: 'Guwahati', zone: 'NFR', sampleTrains: ['12424', '12506'] },
+      { code: 'LMG',  name: 'Lumding Junction', zone: 'NFR', sampleTrains: ['12424'] },
+      { code: 'DMV',  name: 'Dimapur', zone: 'NFR', sampleTrains: ['12424'] },
+      { code: 'MXN',  name: 'Mariani Junction', zone: 'NFR', sampleTrains: ['12424'] },
+      { code: 'NTSK', name: 'New Tinsukia', zone: 'NFR', sampleTrains: ['12424'] },
+      { code: 'DBRG', name: 'Dibrugarh', zone: 'NFR', sampleTrains: ['12424'] },
+      { code: 'NDLS', name: 'New Delhi', zone: 'NR', sampleTrains: ['12424', '12951', '22436', '12627', '12002', '12301'] },
+      { code: 'ANVT', name: 'Anand Vihar Terminal (Delhi)', zone: 'NR', sampleTrains: ['12506'] },
+      { code: 'NZM',  name: 'Hazrat Nizamuddin (Delhi)', zone: 'NR', sampleTrains: ['12951', '12627'] },
+      { code: 'DLI',  name: 'Old Delhi Junction', zone: 'NR', sampleTrains: ['12424'] },
+      { code: 'CNB',  name: 'Kanpur Central', zone: 'NCR', sampleTrains: ['12424', '12506', '22436', '12301'] },
+      { code: 'PRYJ', name: 'Prayagraj Junction (Allahabad)', zone: 'NCR', sampleTrains: ['12424', '12506', '22436', '12301'] },
+      { code: 'DDU',  name: 'Pt DD Upadhyaya Jn (Mughalsarai)', zone: 'ECR', sampleTrains: ['12424', '12506', '12301'] },
+      { code: 'BSB',  name: 'Varanasi Junction', zone: 'NR', sampleTrains: ['22436'] },
+      { code: 'PPTA', name: 'Patliputra Junction (Patna)', zone: 'ECR', sampleTrains: ['12424', '12506'] },
+      { code: 'PNBE', name: 'Patna Junction', zone: 'ECR', sampleTrains: ['12424', '12506'] },
+      { code: 'DNR',  name: 'Danapur', zone: 'ECR', sampleTrains: ['12424', '12506'] },
+      { code: 'ARA',  name: 'Ara Junction', zone: 'ECR', sampleTrains: ['12506'] },
+      { code: 'BXR',  name: 'Buxar', zone: 'ECR', sampleTrains: ['12506'] },
+      { code: 'GAYA', name: 'Gaya Junction', zone: 'ECR', sampleTrains: ['12301'] },
+      { code: 'DHN',  name: 'Dhanbad Junction', zone: 'ECR', sampleTrains: ['12301'] },
+      { code: 'ASN',  name: 'Asansol Junction', zone: 'ER', sampleTrains: ['12301'] },
+      { code: 'BWN',  name: 'Barddhaman Junction', zone: 'ER', sampleTrains: ['12301', '22301'] },
+      { code: 'HWH',  name: 'Howrah Junction (Kolkata)', zone: 'ER', sampleTrains: ['12301', '22301'] },
+      { code: 'SDAH', name: 'Sealdah (Kolkata)', zone: 'ER', sampleTrains: ['22301'] },
+      { code: 'KOAA', name: 'Kolkata Terminal', zone: 'ER', sampleTrains: ['22301'] },
+      { code: 'MMCT', name: 'Mumbai Central', zone: 'WR', sampleTrains: ['12951'] },
+      { code: 'CSMT', name: 'CSMT Mumbai', zone: 'CR', sampleTrains: ['12951'] },
+      { code: 'BVI',  name: 'Borivali (Mumbai)', zone: 'WR', sampleTrains: ['12951'] },
+      { code: 'ST',   name: 'Surat', zone: 'WR', sampleTrains: ['12951'] },
+      { code: 'BRC',  name: 'Vadodara Junction', zone: 'WR', sampleTrains: ['12951'] },
+      { code: 'ADI',  name: 'Ahmedabad Junction', zone: 'WR', sampleTrains: ['12951'] },
+      { code: 'RTM',  name: 'Ratlam Junction', zone: 'WR', sampleTrains: ['12951'] },
+      { code: 'KOTA', name: 'Kota Junction', zone: 'WCR', sampleTrains: ['12951'] },
+      { code: 'SWM',  name: 'Sawai Madhopur', zone: 'WCR', sampleTrains: ['12951'] },
+      { code: 'JP',   name: 'Jaipur Junction', zone: 'NWR', sampleTrains: ['12951'] },
+      { code: 'MTJ',  name: 'Mathura Junction', zone: 'NCR', sampleTrains: ['12002', '12627'] },
+      { code: 'AGC',  name: 'Agra Cantt', zone: 'NCR', sampleTrains: ['12002', '12627'] },
+      { code: 'TDL',  name: 'Tundla Junction', zone: 'NCR', sampleTrains: ['22436'] },
+      { code: 'GWL',  name: 'Gwalior Junction', zone: 'NCR', sampleTrains: ['12002', '12627'] },
+      { code: 'VGLJ', name: 'VGL Jhansi Junction', zone: 'NCR', sampleTrains: ['12002', '12627'] },
+      { code: 'BINA', name: 'Bina Junction', zone: 'WCR', sampleTrains: ['12002', '12627'] },
+      { code: 'BPL',  name: 'Bhopal Junction', zone: 'WCR', sampleTrains: ['12627', '12002'] },
+      { code: 'RKMP', name: 'Rani Kamalapati (Bhopal)', zone: 'WCR', sampleTrains: ['12002'] },
+      { code: 'ET',   name: 'Itarsi Junction', zone: 'WCR', sampleTrains: ['12627'] },
+      { code: 'NGP',  name: 'Nagpur Junction', zone: 'CR', sampleTrains: ['12627'] },
+      { code: 'BSL',  name: 'Bhusaval Junction', zone: 'CR', sampleTrains: ['12627'] },
+      { code: 'SOL',  name: 'Solapur Junction', zone: 'CR', sampleTrains: ['12627'] },
+      { code: 'GTL',  name: 'Guntakal Junction', zone: 'SCR', sampleTrains: ['12627'] },
+      { code: 'DMM',  name: 'Dharmavaram Junction', zone: 'SCR', sampleTrains: ['12627'] },
+      { code: 'SBC',  name: 'KSR Bengaluru City', zone: 'SWR', sampleTrains: ['12627'] },
+      { code: 'MAS',  name: 'MGR Chennai Central', zone: 'SR', sampleTrains: ['12627'] },
+      { code: 'BZA',  name: 'Vijayawada Junction', zone: 'SCR', sampleTrains: ['12627'] },
+      { code: 'SC',   name: 'Secunderabad Junction', zone: 'SCR', sampleTrains: ['12627'] },
+      { code: 'BBS',  name: 'Bhubaneswar', zone: 'ECoR', sampleTrains: ['12301'] },
+      { code: 'PURI', name: 'Puri', zone: 'ECoR', sampleTrains: ['12301'] },
+      { code: 'LKO',  name: 'Lucknow Charbagh NR', zone: 'NR', sampleTrains: ['12424', '12506'] },
+      { code: 'GKP',  name: 'Gorakhpur Junction', zone: 'NER', sampleTrains: ['12506'] },
+      { code: 'ASR',  name: 'Amritsar Junction', zone: 'NR', sampleTrains: ['12951'] },
+      { code: 'CDG',  name: 'Chandigarh Junction', zone: 'NR', sampleTrains: ['12951'] },
+      { code: 'JAT',  name: 'Jammu Tawi', zone: 'NR', sampleTrains: ['12951'] }
+    ];
+
+    const PRESET_TRAINS = {
+      '15910': {
+        trainNo: '15910',
+        trainName: 'LALGARH - DIBRUGARH AVADH ASSAM EXP (VIA NJP)',
+        typeTag: 'EXPRESS',
+        depHour: 19,
+        stations: [
+          { code: 'LGH',  name: 'Lalgarh Jn', dep: '19:50', arr: 'Origin', km: 0 },
+          { code: 'BTI',  name: 'Bathinda Jn', dep: '02:00', arr: '01:30', km: 321 },
+          { code: 'ROK',  name: 'Rohtak Jn', dep: '05:15', arr: '05:13', km: 548 },
+          { code: 'SSB',  name: 'Shakurbasti (Delhi)', dep: '06:20', arr: '06:18', km: 608 },
+          { code: 'DLI',  name: 'Old Delhi Jn', dep: '07:22', arr: '07:07', km: 618 },
+          { code: 'GZB',  name: 'Ghaziabad', dep: '08:12', arr: '08:10', km: 638 },
+          { code: 'MB',   name: 'Moradabad', dep: '10:55', arr: '10:45', km: 779 },
+          { code: 'BE',   name: 'Bareilly', dep: '12:21', arr: '12:16', km: 869 },
+          { code: 'LKO',  name: 'Lucknow Charbagh', dep: '17:40', arr: '17:30', km: 1104 },
+          { code: 'GD',   name: 'Gonda Jn', dep: '20:25', arr: '20:20', km: 1221 },
+          { code: 'GKP',  name: 'Gorakhpur Jn', dep: '23:50', arr: '23:30', km: 1375 },
+          { code: 'SV',   name: 'Siwan Jn', dep: '02:25', arr: '02:20', km: 1494 },
+          { code: 'CPR',  name: 'Chhapra', dep: '03:50', arr: '03:45', km: 1555 },
+          { code: 'HJP',  name: 'Hajipur Jn', dep: '05:25', arr: '05:20', km: 1614 },
+          { code: 'BJU',  name: 'Barauni Jn', dep: '08:55', arr: '08:45', km: 1770 },
+          { code: 'KIR',  name: 'Katihar Jn', dep: '13:00', arr: '12:50', km: 1950 },
+          { code: 'BOE',  name: 'Barsoi Jn', dep: '14:17', arr: '14:15', km: 2006 },
+          { code: 'KNE',  name: 'Kishanganj', dep: '15:20', arr: '15:15', km: 2063 },
+          { code: 'NJP',  name: 'New Jalpaiguri (Siliguri)', dep: '16:50', arr: '16:40', km: 2150 },
+          { code: 'NCB',  name: 'New Cooch Behar', dep: '19:45', arr: '19:40', km: 2277 },
+          { code: 'NBQ',  name: 'New Bongaigaon', dep: '21:55', arr: '21:50', km: 2402 },
+          { code: 'RNY',  name: 'Rangiya Jn', dep: '23:45', arr: '23:40', km: 2511 },
+          { code: 'KYQ',  name: 'Kamakhya Jn', dep: '00:40', arr: '00:35', km: 2552 },
+          { code: 'GHY',  name: 'Guwahati', dep: '01:20', arr: '01:05', km: 2559 },
+          { code: 'LMG',  name: 'Lumding Jn', dep: '04:45', arr: '04:40', km: 2739 },
+          { code: 'DMV',  name: 'Dimapur', dep: '06:20', arr: '06:10', km: 2808 },
+          { code: 'MXN',  name: 'Mariani Jn', dep: '08:50', arr: '08:40', km: 2916 },
+          { code: 'NTSK', name: 'New Tinsukia', dep: '12:20', arr: '12:10', km: 3073 },
+          { code: 'DBRG', name: 'Dibrugarh', dep: 'Dest', arr: '14:05', km: 3115 }
+        ],
+        coachSpec: [
+          { id: 'A1', classCode: '2A' },
+          { id: 'B1', classCode: '3A' },
+          { id: 'B2', classCode: '3A' },
+          { id: 'B3', classCode: '3A' },
+          { id: 'S1', classCode: 'SL' },
+          { id: 'S2', classCode: 'SL' },
+          { id: 'S3', classCode: 'SL' },
+          { id: 'S4', classCode: 'SL' },
+          { id: 'S5', classCode: 'SL' },
+          { id: 'S6', classCode: 'SL' }
+        ]
+      },
+      '12424': {
+        trainNo: '12424',
+        trainName: 'NEW DELHI - DIBRUGARH TOWN RAJDHANI EXP (VIA NJP)',
+        typeTag: 'RAJDHANI',
+        depHour: 16,
+        stations: [
+          { code: 'NDLS', name: 'New Delhi', dep: '16:20', arr: 'Origin', km: 0 },
+          { code: 'CNB',  name: 'Kanpur Central', dep: '21:07', arr: '21:02', km: 440 },
+          { code: 'PRYJ', name: 'Prayagraj Jn', dep: '23:10', arr: '23:08', km: 634 },
+          { code: 'DDU',  name: 'Pt DD Upadhyaya Jn', dep: '01:33', arr: '01:23', km: 786 },
+          { code: 'PPTA', name: 'Patliputra Jn (Patna)', dep: '04:05', arr: '03:55', km: 991 },
+          { code: 'BJU',  name: 'Barauni Jn', dep: '06:00', arr: '05:50', km: 1098 },
+          { code: 'KIR',  name: 'Katihar Jn', dep: '08:30', arr: '08:15', km: 1277 },
+          { code: 'KNE',  name: 'Kishanganj', dep: '10:02', arr: '10:00', km: 1369 },
+          { code: 'NJP',  name: 'New Jalpaiguri (Siliguri)', dep: '12:15', arr: '11:50', km: 1456 },
+          { code: 'NCB',  name: 'New Cooch Behar', dep: '14:15', arr: '14:10', km: 1582 },
+          { code: 'NBQ',  name: 'New Bongaigaon', dep: '16:30', arr: '16:25', km: 1708 },
+          { code: 'GHY',  name: 'Guwahati', dep: '19:15', arr: '19:00', km: 1865 },
+          { code: 'DBRG', name: 'Dibrugarh', dep: 'Dest', arr: '05:00', km: 2432 }
+        ],
+        coachSpec: [
+          { id: 'H1', classCode: '1A' },
+          { id: 'A1', classCode: '2A' },
+          { id: 'A2', classCode: '2A' },
+          { id: 'B1', classCode: '3A' },
+          { id: 'B2', classCode: '3A' },
+          { id: 'B3', classCode: '3A' },
+          { id: 'B4', classCode: '3A' },
+          { id: 'M1', classCode: '3E' },
+          { id: 'S1', classCode: 'SL' },
+          { id: 'C1', classCode: 'CC' }
+        ]
+      },
+      '12506': {
+        trainNo: '12506',
+        trainName: 'ANAND VIHAR (DELHI) - KAMAKHYA NORTH EAST SF EXP (VIA NJP)',
+        typeTag: 'SUPERFAST',
+        depHour: 7,
+        stations: [
+          { code: 'ANVT', name: 'Anand Vihar Terminal', dep: '07:40', arr: 'Origin', km: 0 },
+          { code: 'CNB',  name: 'Kanpur Central', dep: '13:35', arr: '13:25', km: 428 },
+          { code: 'PRYJ', name: 'Prayagraj Jn', dep: '16:15', arr: '16:05', km: 622 },
+          { code: 'DDU',  name: 'Pt DD Upadhyaya Jn', dep: '18:50', arr: '18:40', km: 774 },
+          { code: 'ARA',  name: 'Ara Junction', dep: '20:55', arr: '20:53', km: 938 },
+          { code: 'PPTA', name: 'Patliputra Jn', dep: '21:55', arr: '21:45', km: 985 },
+          { code: 'BJU',  name: 'Barauni Jn', dep: '00:35', arr: '00:25', km: 1094 },
+          { code: 'KIR',  name: 'Katihar Jn', dep: '04:05', arr: '03:50', km: 1273 },
+          { code: 'KNE',  name: 'Kishanganj', dep: '05:45', arr: '05:40', km: 1365 },
+          { code: 'NJP',  name: 'New Jalpaiguri (Siliguri)', dep: '07:30', arr: '07:15', km: 1452 },
+          { code: 'NCB',  name: 'New Cooch Behar', dep: '09:40', arr: '09:35', km: 1578 },
+          { code: 'NBQ',  name: 'New Bongaigaon', dep: '12:10', arr: '12:00', km: 1704 },
+          { code: 'KYQ',  name: 'Kamakhya Jn (Guwahati)', dep: 'Dest', arr: '16:15', km: 1854 }
+        ],
+        coachSpec: [
+          { id: 'H1', classCode: '1A' },
+          { id: 'A1', classCode: '2A' },
+          { id: 'B1', classCode: '3A' },
+          { id: 'B2', classCode: '3A' },
+          { id: 'B3', classCode: '3A' },
+          { id: 'M1', classCode: '3E' },
+          { id: 'M2', classCode: '3E' },
+          { id: 'S1', classCode: 'SL' },
+          { id: 'S2', classCode: 'SL' },
+          { id: 'S3', classCode: 'SL' }
+        ]
+      },
+      '22301': {
+        trainNo: '22301',
+        trainName: 'HOWRAH - NEW JALPAIGURI (NJP) VANDE BHARAT EXP',
+        typeTag: 'VANDE BHARAT',
+        depHour: 5,
+        stations: [
+          { code: 'HWH',  name: 'Howrah Jn (Kolkata)', dep: '05:55', arr: 'Origin', km: 0 },
+          { code: 'BHP',  name: 'Bolpur Shantiniketan', dep: '07:43', arr: '07:41', km: 146 },
+          { code: 'MLDT', name: 'Malda Town', dep: '10:35', arr: '10:32', km: 332 },
+          { code: 'BOE',  name: 'Barsoi Jn', dep: '11:52', arr: '11:50', km: 418 },
+          { code: 'KNE',  name: 'Kishanganj', dep: '12:28', arr: '12:26', km: 476 },
+          { code: 'NJP',  name: 'New Jalpaiguri (Siliguri)', dep: 'Dest', arr: '13:25', km: 563 }
+        ],
+        coachSpec: [
+          { id: 'E1', classCode: '1A' },
+          { id: 'E2', classCode: '1A' },
+          { id: 'C1', classCode: 'CC' },
+          { id: 'C2', classCode: 'CC' },
+          { id: 'C3', classCode: 'CC' },
+          { id: 'C4', classCode: 'CC' },
+          { id: 'A1', classCode: '2A' },
+          { id: 'B1', classCode: '3A' }
+        ]
+      },
+      '12951': {
+        trainNo: '12951',
+        trainName: 'MUMBAI CENTRAL - NEW DELHI TEJAS RAJDHANI EXP',
+        typeTag: 'RAJDHANI',
+        depHour: 17,
+        stations: [
+          { code: 'MMCT', name: 'Mumbai Central', dep: '17:00', arr: 'Origin', km: 0 },
+          { code: 'BVI',  name: 'Borivali', dep: '17:24', arr: '17:22', km: 30 },
+          { code: 'ST',   name: 'Surat', dep: '19:48', arr: '19:43', km: 263 },
+          { code: 'BRC',  name: 'Vadodara Jn', dep: '21:16', arr: '21:06', km: 392 },
+          { code: 'RTM',  name: 'Ratlam Jn', dep: '00:25', arr: '00:22', km: 653 },
+          { code: 'KOTA', name: 'Kota Jn', dep: '03:20', arr: '03:10', km: 920 },
+          { code: 'SWM',  name: 'Sawai Madhopur', dep: '04:25', arr: '04:23', km: 1028 },
+          { code: 'NDLS', name: 'New Delhi', dep: 'Dest', arr: '08:32', km: 1384 }
+        ],
+        coachSpec: [
+          { id: 'H1', classCode: '1A' },
+          { id: 'A1', classCode: '2A' },
+          { id: 'A2', classCode: '2A' },
+          { id: 'B1', classCode: '3A' },
+          { id: 'B2', classCode: '3A' },
+          { id: 'B3', classCode: '3A' },
+          { id: 'B4', classCode: '3A' },
+          { id: 'M1', classCode: '3E' },
+          { id: 'S1', classCode: 'SL' },
+          { id: 'C1', classCode: 'CC' }
+        ]
+      },
+      '22436': {
+        trainNo: '22436',
+        trainName: 'NEW DELHI - VARANASI VANDE BHARAT EXPRESS',
+        typeTag: 'VANDE BHARAT',
+        depHour: 6,
+        stations: [
+          { code: 'NDLS', name: 'New Delhi', dep: '06:00', arr: 'Origin', km: 0 },
+          { code: 'TDL',  name: 'Tundla Jn', dep: '08:12', arr: '08:10', km: 204 },
+          { code: 'CNB',  name: 'Kanpur Central', dep: '10:10', arr: '10:05', km: 440 },
+          { code: 'PRYJ', name: 'Prayagraj Jn', dep: '12:10', arr: '12:05', km: 634 },
+          { code: 'BSB',  name: 'Varanasi Jn', dep: 'Dest', arr: '14:00', km: 759 }
+        ],
+        coachSpec: [
+          { id: 'E1', classCode: '1A' },
+          { id: 'C1', classCode: 'CC' },
+          { id: 'C2', classCode: 'CC' },
+          { id: 'C3', classCode: 'CC' },
+          { id: 'A1', classCode: '2A' },
+          { id: 'B1', classCode: '3A' },
+          { id: 'M1', classCode: '3E' },
+          { id: 'S1', classCode: 'SL' }
+        ]
+      },
+      '12627': {
+        trainNo: '12627',
+        trainName: 'KSR BENGALURU - NEW DELHI KARNATAKA SF EXP',
+        typeTag: 'SUPERFAST',
+        depHour: 19,
+        stations: [
+          { code: 'SBC',  name: 'KSR Bengaluru', dep: '19:20', arr: 'Origin', km: 0 },
+          { code: 'DMM',  name: 'Dharmavaram Jn', dep: '22:25', arr: '22:20', km: 180 },
+          { code: 'GTL',  name: 'Guntakal Jn', dep: '23:50', arr: '23:45', km: 280 },
+          { code: 'SOL',  name: 'Solapur Jn', dep: '04:55', arr: '04:50', km: 685 },
+          { code: 'BSL',  name: 'Bhusaval Jn', dep: '14:05', arr: '14:00', km: 1255 },
+          { code: 'BPL',  name: 'Bhopal Jn', dep: '20:20', arr: '20:10', km: 1656 },
+          { code: 'VGLJ', name: 'VGL Jhansi Jn', dep: '00:15', arr: '00:07', km: 1948 },
+          { code: 'AGC',  name: 'Agra Cantt', dep: '03:05', arr: '03:00', km: 2164 },
+          { code: 'NDLS', name: 'New Delhi', dep: 'Dest', arr: '06:25', km: 2359 }
+        ],
+        coachSpec: [
+          { id: 'H1', classCode: '1A' },
+          { id: 'A1', classCode: '2A' },
+          { id: 'A2', classCode: '2A' },
+          { id: 'B1', classCode: '3A' },
+          { id: 'B2', classCode: '3A' },
+          { id: 'B3', classCode: '3A' },
+          { id: 'M1', classCode: '3E' },
+          { id: 'S1', classCode: 'SL' },
+          { id: 'S2', classCode: 'SL' },
+          { id: 'S3', classCode: 'SL' },
+          { id: 'C1', classCode: 'CC' }
+        ]
+      },
+      '12002': {
+        trainNo: '12002',
+        trainName: 'NEW DELHI - RANI KAMALAPATI BHOPAL SHATABDI EXP',
+        typeTag: 'SHATABDI',
+        depHour: 6,
+        stations: [
+          { code: 'NDLS', name: 'New Delhi', dep: '06:00', arr: 'Origin', km: 0 },
+          { code: 'MTJ',  name: 'Mathura Jn', dep: '07:22', arr: '07:20', km: 141 },
+          { code: 'AGC',  name: 'Agra Cantt', dep: '07:59', arr: '07:54', km: 195 },
+          { code: 'GWL',  name: 'Gwalior Jn', dep: '09:28', arr: '09:23', km: 313 },
+          { code: 'VGLJ', name: 'VGL Jhansi Jn', dep: '10:45', arr: '10:40', km: 410 },
+          { code: 'BINA', name: 'Bina Jn', dep: '12:42', arr: '12:40', km: 563 },
+          { code: 'RKMP', name: 'Rani Kamalapati', dep: 'Dest', arr: '14:40', km: 707 }
+        ],
+        coachSpec: [
+          { id: 'E1', classCode: '1A' },
+          { id: 'C1', classCode: 'CC' },
+          { id: 'C2', classCode: 'CC' },
+          { id: 'C3', classCode: 'CC' },
+          { id: 'A1', classCode: '2A' },
+          { id: 'B1', classCode: '3A' },
+          { id: 'M1', classCode: '3E' },
+          { id: 'S1', classCode: 'SL' }
+        ]
+      },
+      '12301': {
+        trainNo: '12301',
+        trainName: 'HOWRAH - NEW DELHI KOLKATA RAJDHANI EXP',
+        typeTag: 'RAJDHANI',
+        depHour: 16,
+        stations: [
+          { code: 'HWH',  name: 'Howrah Jn', dep: '16:50', arr: 'Origin', km: 0 },
+          { code: 'DHN',  name: 'Dhanbad Jn', dep: '20:05', arr: '20:00', km: 259 },
+          { code: 'GAYA', name: 'Gaya Jn', dep: '22:48', arr: '22:45', km: 458 },
+          { code: 'DDU',  name: 'Pt DD Upadhyaya Jn', dep: '01:25', arr: '01:15', km: 661 },
+          { code: 'PRYJ', name: 'Prayagraj Jn', dep: '03:17', arr: '03:15', km: 813 },
+          { code: 'CNB',  name: 'Kanpur Central', dep: '05:25', arr: '05:20', km: 1008 },
+          { code: 'NDLS', name: 'New Delhi', dep: 'Dest', arr: '10:05', km: 1451 }
+        ],
+        coachSpec: [
+          { id: 'H1', classCode: '1A' },
+          { id: 'A1', classCode: '2A' },
+          { id: 'A2', classCode: '2A' },
+          { id: 'B1', classCode: '3A' },
+          { id: 'B2', classCode: '3A' },
+          { id: 'B3', classCode: '3A' },
+          { id: 'M1', classCode: '3E' },
+          { id: 'S1', classCode: 'SL' },
+          { id: 'C1', classCode: 'CC' }
+        ]
+      }
+    };
+
+    // Procedural Corridor Pool for ANY user-entered 5-digit Train Number
+    const CORRIDOR_POOL = [
+      {
+        nameSuffix: 'SUPERFAST EXPRESS',
+        typeTag: 'SUPERFAST',
+        depHour: 18,
+        stations: [
+          { code: 'CSMT', name: 'CSMT Mumbai', dep: '18:10', arr: 'Origin', km: 0 },
+          { code: 'KYN',  name: 'Kalyan Jn', dep: '19:05', arr: '19:02', km: 54 },
+          { code: 'NK',   name: 'Nashik Road', dep: '21:40', arr: '21:35', km: 187 },
+          { code: 'BSL',  name: 'Bhusaval Jn', dep: '01:15', arr: '01:10', km: 445 },
+          { code: 'NGP',  name: 'Nagpur Jn', dep: '06:55', arr: '06:45', km: 837 },
+          { code: 'R',    name: 'Raipur Jn', dep: '11:35', arr: '11:30', km: 1138 },
+          { code: 'BSP',  name: 'Bilaspur Jn', dep: '13:30', arr: '13:20', km: 1249 },
+          { code: 'TATA', name: 'Tatanagar Jn', dep: '19:05', arr: '19:00', km: 1718 },
+          { code: 'HWH',  name: 'Howrah Jn', dep: 'Dest', arr: '23:15', km: 1968 }
+        ]
+      },
+      {
+        nameSuffix: 'MAILL / EXPRESS',
+        typeTag: 'MAIL/EXP',
+        depHour: 15,
+        stations: [
+          { code: 'MAS',  name: 'MGR Chennai Central', dep: '15:30', arr: 'Origin', km: 0 },
+          { code: 'GDR',  name: 'Gudur Jn', dep: '17:25', arr: '17:23', km: 138 },
+          { code: 'BZA',  name: 'Vijayawada Jn', dep: '21:50', arr: '21:40', km: 431 },
+          { code: 'WL',   name: 'Warangal', dep: '01:02', arr: '01:00', km: 638 },
+          { code: 'BPQ',  name: 'Balharshah', dep: '05:15', arr: '05:10', km: 881 },
+          { code: 'NGP',  name: 'Nagpur Jn', dep: '08:35', arr: '08:30', km: 1090 },
+          { code: 'BPL',  name: 'Bhopal Jn', dep: '14:55', arr: '14:45', km: 1480 },
+          { code: 'NZM',  name: 'Hazrat Nizamuddin', dep: 'Dest', arr: '23:45', km: 2175 }
+        ]
+      },
+      {
+        nameSuffix: 'JAN SHATABDI / INTERCITY EXP',
+        typeTag: 'EXPRESS',
+        depHour: 14,
+        stations: [
+          { code: 'ADI',  name: 'Ahmedabad Jn', dep: '14:45', arr: 'Origin', km: 0 },
+          { code: 'MSH',  name: 'Mahesana Jn', dep: '15:50', arr: '15:48', km: 68 },
+          { code: 'PNU',  name: 'Palanpur Jn', dep: '17:12', arr: '17:10', km: 133 },
+          { code: 'ABR',  name: 'Abu Road', dep: '18:05', arr: '18:00', km: 186 },
+          { code: 'AII',  name: 'Ajmer Jn', dep: '22:25', arr: '22:15', km: 491 },
+          { code: 'JP',   name: 'Jaipur Jn', dep: '00:35', arr: '00:25', km: 625 },
+          { code: 'DEC',  name: 'Delhi Cantt', dep: '04:52', arr: '04:50', km: 918 },
+          { code: 'NDLS', name: 'New Delhi', dep: 'Dest', arr: '05:30', km: 934 }
+        ]
+      }
+    ];
+
+    /*************************************************************************
+     * 3. DETERMINISTIC HASH & COACH BERTH GENERATOR (SUPPORTS 1 TO 72 SEATS)
+     *************************************************************************/
+    function computeDateSeed(trainNo, dateStr) {
+      const combined = `${trainNo}_${dateStr}`;
+      let hash = 2166136261;
+      for (let i = 0; i < combined.length; i++) {
+        hash ^= combined.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return Math.abs(hash);
+    }
+
+    function buildCoachBerths(coachId, classCode, stations, trainDateSeed, coachIdx) {
+      const berths = [];
+      const totalBerths = CLASS_META[classCode]?.totalSeats || 72;
+      const numLegs = stations.length - 1;
+
+      for (let num = 1; num <= totalBerths; num++) {
+        let type = 'LB';
+        let bay = 1;
+
+        if (classCode === '1A') {
+          // 24 Berths: 4 Cabins (4 berths each = 16) + 4 Coupes (2 berths each = 8)
+          if (num <= 4) { bay = 1; type = (num % 2 === 1) ? 'LB' : 'UB'; }
+          else if (num <= 6) { bay = 2; type = (num % 2 === 1) ? 'LB' : 'UB'; }
+          else if (num <= 10) { bay = 3; type = (num % 2 === 1) ? 'LB' : 'UB'; }
+          else if (num <= 12) { bay = 4; type = (num % 2 === 1) ? 'LB' : 'UB'; }
+          else if (num <= 16) { bay = 5; type = (num % 2 === 1) ? 'LB' : 'UB'; }
+          else if (num <= 18) { bay = 6; type = (num % 2 === 1) ? 'LB' : 'UB'; }
+          else if (num <= 22) { bay = 7; type = (num % 2 === 1) ? 'LB' : 'UB'; }
+          else { bay = 8; type = (num % 2 === 1) ? 'LB' : 'UB'; }
+        } else if (classCode === '2A') {
+          // 48 Berths: 8 Bays of 6 berths
+          bay = Math.ceil(num / 6);
+          const pos = (num - 1) % 6;
+          const map2A = ['LB', 'UB', 'LB', 'UB', 'SL', 'SU'];
+          type = map2A[pos];
+        } else if (classCode === '3A' || classCode === '3E' || classCode === 'SL') {
+          // 72 Berths: 9 Bays of 8 berths
+          bay = Math.ceil(num / 8);
+          const pos = (num - 1) % 8;
+          const map3A = ['LB', 'MB', 'UB', 'LB', 'MB', 'UB', 'SL', 'SU'];
+          type = map3A[pos];
+        } else if (classCode === 'CC') {
+          // 70 Seats: 14 Rows of 5 seats (3x2)
+          bay = Math.ceil(num / 5);
+          const pos = (num - 1) % 5;
+          const mapCC = ['WS', 'MS', 'AS', 'AS', 'WS'];
+          type = mapCC[pos];
+        }
+
+        // Deterministic hash incorporating Train+Date seed, Coach index, and Berth number
+        const h = Math.abs(((num * 2654435761) ^ (trainDateSeed + coachIdx * 9973))) % 37;
+
+        // Build leg-by-leg occupancy array: true = vacant, false = booked
+        const legVacant = new Array(numLegs).fill(false);
+
+        if (h === 1 || h === 7 || h === 16 || h === 25 || (num === 4 && coachIdx % 2 === 0)) {
+          // FULL ROUTE VACANT (~14% of berths)
+          for (let l = 0; l < numLegs; l++) legVacant[l] = true;
+        } else if (h === 3 || h === 11 || h === 19 || h === 28 || h === 33) {
+          // PARTIAL SEGMENT VACANT (~15% of berths)
+          // Create realistic split segments (either first half vacant, second half vacant, or middle leg vacant)
+          const splitPoint = Math.max(1, Math.min(numLegs - 1, (num + coachIdx) % numLegs));
+          if (h === 3 || h === 19) {
+            // Vacant from Origin up to splitPoint, Booked afterwards
+            for (let l = 0; l < splitPoint; l++) legVacant[l] = true;
+          } else if (h === 11 || h === 28) {
+            // Booked from Origin to splitPoint, Vacant from splitPoint to Destination
+            for (let l = splitPoint; l < numLegs; l++) legVacant[l] = true;
+          } else {
+            // Vacant in middle segment
+            const mStart = Math.max(0, splitPoint - 1);
+            const mEnd = Math.min(numLegs, mStart + 2);
+            for (let l = mStart; l < mEnd; l++) legVacant[l] = true;
+          }
+        }
+        // Else all legs remain false (BOOKED / OCCUPIED for entire route)
+
+        // Convert legVacant array into contiguous vacantSegments and bookedSegments
+        const vacantSegments = buildContiguousSegments(legVacant, true, stations);
+        const bookedSegments = buildContiguousSegments(legVacant, false, stations);
+
+        berths.push({
+          coachId,
+          classCode,
+          berthNo: num,
+          berthType: type,
+          bay,
+          legVacant,
+          vacantSegments,
+          bookedSegments,
+          // Default status for full route (updated dynamically when user changes Boarding/Destination filter)
+          status: 'BOOKED'
+        });
+      }
+      return berths;
+    }
+
+    function buildContiguousSegments(legVacant, targetState, stations) {
+      const segments = [];
+      let startLeg = null;
+      for (let i = 0; i < legVacant.length; i++) {
+        if (legVacant[i] === targetState && startLeg === null) {
+          startLeg = i;
+        } else if (legVacant[i] !== targetState && startLeg !== null) {
+          segments.push(formatStationSegment(stations, startLeg, i));
+          startLeg = null;
+        }
+      }
+      if (startLeg !== null) {
+        segments.push(formatStationSegment(stations, startLeg, legVacant.length));
+      }
+      return segments;
+    }
+
+    function formatStationSegment(stations, fromIdx, toIdx) {
+      const stA = stations[fromIdx];
+      const stB = stations[toIdx];
+      return {
+        fromCode: stA.code,
+        fromName: stA.name,
+        fromDep: stA.dep,
+        toCode: stB.code,
+        toName: stB.name,
+        toArr: stB.arr,
+        fromIdx,
+        toIdx,
+        km: stB.km - stA.km
+      };
+    }
+
+    // Generate or retrieve train object for ANY 5-digit number + date
+    function getOrBuildTrainForDate(trainNoRaw, dateStr) {
+      const cleanNo = (trainNoRaw || '12951').replace(/\D/g, '').padEnd(5, '0').slice(0, 5);
+      const seed = computeDateSeed(cleanNo, dateStr);
+      let baseSpec = PRESET_TRAINS[cleanNo];
+
+      if (!baseSpec) {
+        const corridor = CORRIDOR_POOL[parseInt(cleanNo, 10) % CORRIDOR_POOL.length];
+        const firstStation = corridor.stations[0].name.split(' ')[0].toUpperCase();
+        const lastStation = corridor.stations[corridor.stations.length - 1].name.split(' ')[0].toUpperCase();
+        baseSpec = {
+          trainNo: cleanNo,
+          trainName: `${firstStation} - ${lastStation} ${corridor.nameSuffix}`,
+          typeTag: corridor.typeTag,
+          depHour: corridor.depHour,
+          stations: corridor.stations,
+          coachSpec: [
+            { id: 'H1', classCode: '1A' },
+            { id: 'A1', classCode: '2A' },
+            { id: 'A2', classCode: '2A' },
+            { id: 'B1', classCode: '3A' },
+            { id: 'B2', classCode: '3A' },
+            { id: 'B3', classCode: '3A' },
+            { id: 'M1', classCode: '3E' },
+            { id: 'S1', classCode: 'SL' },
+            { id: 'S2', classCode: 'SL' },
+            { id: 'C1', classCode: 'CC' }
+          ]
+        };
+      }
+
+      const coaches = baseSpec.coachSpec.map((cs, idx) => ({
+        id: cs.id,
+        classCode: cs.classCode,
+        berths: buildCoachBerths(cs.id, cs.classCode, baseSpec.stations, seed, idx + 1)
+      }));
+
+      return {
+        trainNo: cleanNo,
+        trainName: baseSpec.trainName,
+        typeTag: baseSpec.typeTag || 'EXPRESS',
+        depHour: baseSpec.depHour || 17,
+        dateStr,
+        seed,
+        stations: baseSpec.stations,
+        coaches
+      };
+    }
+
+    /*************************************************************************
+     * 4. PORTAL STATE & SEGMENT EVALUATION
+     *************************************************************************/
+    const state = {
+      activeTrainObj: null,
+      journeyDate: '2026-10-27',
+      forceSimulateFutureChart: true,
+      selectedClass: 'ALL',
+      activeCoachId: 'B1',
+      activeView: 'visual',
+      selectedBerthNo: 1,
+      boardingStation: 'ALL',
+      destinationStation: 'ALL',
+      filterBerthType: 'ALL',
+      filterVacancyType: 'ALL',
+      searchQuery: '',
+      apiConfig: {
+        mode: 'SMART_ENGINE',
+        endpointUrl: '',
+        apiKey: ''
+      }
+    };
+
+    // Evaluates whether a berth is FULL (Available for selected journey), PARTIAL, or BOOKED
+    function evaluateBerthForSelectedJourney(berth, train) {
+      const numLegs = train.stations.length - 1;
+      let reqStartIdx = 0;
+      let reqEndIdx = numLegs;
+
+      if (state.boardingStation !== 'ALL') {
+        const idx = train.stations.findIndex(s => s.code === state.boardingStation);
+        if (idx !== -1 && idx < numLegs) reqStartIdx = idx;
+      }
+      if (state.destinationStation !== 'ALL') {
+        const idx = train.stations.findIndex(s => s.code === state.destinationStation);
+        if (idx > reqStartIdx) reqEndIdx = idx;
+      }
+
+      let vacantLegsInWindow = 0;
+      const totalWindowLegs = reqEndIdx - reqStartIdx;
+      for (let l = reqStartIdx; l < reqEndIdx; l++) {
+        if (berth.legVacant[l]) vacantLegsInWindow++;
+      }
+
+      if (vacantLegsInWindow === totalWindowLegs && totalWindowLegs > 0) {
+        return 'FULL'; // Available for entire requested journey
+      } else if (vacantLegsInWindow > 0) {
+        return 'PARTIAL'; // Available for part of the requested journey
+      } else {
+        return 'BOOKED'; // Occupied throughout requested journey
+      }
+    }
+
+    function recalculateAllBerthStatuses() {
+      const train = state.activeTrainObj;
+      if (!train) return;
+      train.coaches.forEach(coach => {
+        coach.berths.forEach(berth => {
+          berth.status = evaluateBerthForSelectedJourney(berth, train);
+        });
+      });
+    }
+
+    /*************************************************************************
+     * 5. STARTUP & LIVE IST CLOCK
+     *************************************************************************/
+    window.onload = function () {
+      try {
+        const saved = localStorage.getItem('irctc_fasttrack_api_config');
+        if (saved) {
+          state.apiConfig = JSON.parse(saved);
+          document.getElementById('apiEngineModeSelect').value = state.apiConfig.mode || 'SMART_ENGINE';
+          document.getElementById('apiEndpointUrlInput').value = state.apiConfig.endpointUrl || '';
+          document.getElementById('apiKeyInput').value = state.apiConfig.apiKey || '';
+        }
+      } catch (e) {}
+
+      const dateEl = document.getElementById('journeyDate');
+      if (dateEl && !dateEl.value) {
+        dateEl.value = state.journeyDate;
+      }
+
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
+      updateEngineBadge();
+
+      document.addEventListener('click', function (evt) {
+        const fromWrap = document.getElementById('fromComboboxWrapper');
+        const toWrap = document.getElementById('toComboboxWrapper');
+        let closedAny = false;
+        if (fromWrap && !fromWrap.contains(evt.target)) {
+          const fromDrop = document.getElementById('fromSuggestDropdown');
+          if (fromDrop && !fromDrop.classList.contains('hidden')) {
+            fromDrop.classList.add('hidden');
+            closedAny = true;
+          }
+        }
+        if (toWrap && !toWrap.contains(evt.target)) {
+          const toDrop = document.getElementById('toSuggestDropdown');
+          if (toDrop && !toDrop.classList.contains('hidden')) {
+            toDrop.classList.add('hidden');
+            closedAny = true;
+          }
+        }
+        if (closedAny) {
+          syncComboboxInputsWithState();
+        }
+      });
+
+      selectPresetTrain('15910');
+      populateSampleCustomJson();
+    };
+
+    function updateLiveClock() {
+      const now = new Date();
+      const formatted = now.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      const el = document.getElementById('liveClock');
+      if (el) el.textContent = `${formatted} IST`;
+    }
+
+    function updateEngineBadge() {
+      const ind = document.getElementById('engineModeIndicator');
+      if (state.apiConfig.mode === 'CUSTOM_API' && state.apiConfig.endpointUrl) {
+        ind.textContent = 'Live API Proxy + Smart Fallback';
+      } else {
+        ind.textContent = 'Smart Chart Engine Active';
+      }
+    }
+
+    /*************************************************************************
+     * 6. TRAIN + DATE SEARCH EXECUTION
+     *************************************************************************/
+    function selectPresetTrain(trainNo) {
+      document.getElementById('trainNumberInput').value = trainNo;
+      executeTrainDateSearch(false);
+    }
+
+    async function executeTrainDateSearch(showToastFeedback = false) {
+      const rawTrainNo = document.getElementById('trainNumberInput').value.trim() || '12951';
+      const cleanTrainNo = rawTrainNo.replace(/\D/g, '').padEnd(5, '0').slice(0, 5);
+      document.getElementById('trainNumberInput').value = cleanTrainNo;
+
+      const dateVal = document.getElementById('journeyDate').value || '2026-10-27';
+      state.journeyDate = dateVal;
+
+      // Highlight matching preset chip if any
+      document.querySelectorAll('.train-chip').forEach(btn => {
+        if (btn.id === `chip-${cleanTrainNo}`) {
+          btn.className = 'train-chip px-2.5 py-1 rounded-full text-xs font-bold transition border cursor-pointer bg-irctc-navy text-white border-irctc-navy shadow-2xs';
+        } else {
+          btn.className = 'train-chip px-2.5 py-1 rounded-full text-xs font-semibold transition border cursor-pointer bg-slate-100 hover:bg-orange-50 text-slate-700 border-slate-300';
+        }
+      });
+
+      // Optional Live API call if user configured CUSTOM_API
+      let loadedFromCustomApi = false;
+      if (state.apiConfig.mode === 'CUSTOM_API' && state.apiConfig.endpointUrl) {
+        try {
+          const headers = { 'Content-Type': 'application/json' };
+          if (state.apiConfig.apiKey) {
+            headers['x-rapidapi-key'] = state.apiConfig.apiKey;
+            headers['Authorization'] = `Bearer ${state.apiConfig.apiKey}`;
+          }
+          const resp = await fetch(state.apiConfig.endpointUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ trainNo: cleanTrainNo, journeyDate: dateVal })
+          });
+          if (resp.ok) {
+            const payload = await resp.json();
+            if (payload && payload.trainNo && Array.isArray(payload.stations)) {
+              window.loadExternalChartData(payload);
+              loadedFromCustomApi = true;
+            }
+          }
+        } catch (e) {
+          // Automatic fallback to built-in deterministic engine
+        }
+      }
+
+      if (!loadedFromCustomApi) {
+        const prevTrainNo = state.activeTrainObj?.trainNo;
+        state.activeTrainObj = getOrBuildTrainForDate(cleanTrainNo, dateVal);
+
+        // If train changed, reset station dropdowns and pick preferred coach
+        if (prevTrainNo !== cleanTrainNo) {
+          state.selectedClass = 'ALL';
+          const prefCoach = state.activeTrainObj.coaches.find(c => c.classCode === '3A') || state.activeTrainObj.coaches[0];
+          state.activeCoachId = prefCoach.id;
+          populateStationDropdowns(state.activeTrainObj);
+        } else {
+          // Ensure activeCoachId exists
+          if (!state.activeTrainObj.coaches.some(c => c.id === state.activeCoachId)) {
+            state.activeCoachId = state.activeTrainObj.coaches[0].id;
+          }
+        }
+      }
+
+      recalculateAllBerthStatuses();
+
+      // Default to first available seat in active coach or seat #1
+      const activeCoach = getActiveCoach();
+      const firstAvail = activeCoach.berths.find(b => b.status === 'FULL') || activeCoach.berths[0];
+      state.selectedBerthNo = firstAvail.berthNo;
+
+      refreshChartDisplay();
+
+      if (showToastFeedback) {
+        const dayNum = parseInt(dateVal.split('-')[2], 10);
+        const parity = (dayNum % 2 === 0) ? 'Even Date' : 'Odd Date';
+        showToast(`Loaded ${parity} Chart (${dateVal}) for Train ${cleanTrainNo}`);
+      }
+    }
+
+    function getActiveTrain() {
+      return state.activeTrainObj;
+    }
+
+    function getActiveCoach() {
+      const train = getActiveTrain();
+      return train.coaches.find(c => c.id === state.activeCoachId) || train.coaches[0];
+    }
+
+    function populateStationDropdowns(train) {
+      const boardingEl = document.getElementById('boardingStation');
+      const destEl = document.getElementById('destinationStation');
+      const tableFromEl = document.getElementById('tableFromStationFilter');
+      const tableToEl = document.getElementById('tableToStationFilter');
+
+      const stns = train.stations;
+
+      boardingEl.innerHTML = `<option value="ALL">Origin: ${stns[0].code} - ${stns[0].name}</option>` +
+        stns.slice(0, -1).map(s => `<option value="${s.code}">${s.code} - ${s.name} (${s.dep})</option>`).join('');
+
+      destEl.innerHTML = `<option value="ALL">Dest: ${stns[stns.length - 1].code} - ${stns[stns.length - 1].name}</option>` +
+        stns.slice(1).map(s => `<option value="${s.code}">${s.code} - ${s.name} (${s.arr})</option>`).join('');
+
+      tableFromEl.innerHTML = `<option value="ALL">Any Stop</option>` +
+        stns.slice(0, -1).map(s => `<option value="${s.code}">${s.code} - ${s.name}</option>`).join('');
+
+      tableToEl.innerHTML = `<option value="ALL">Any Stop</option>` +
+        stns.slice(1).map(s => `<option value="${s.code}">${s.code} - ${s.name}</option>`).join('');
+
+      state.boardingStation = 'ALL';
+      state.destinationStation = 'ALL';
+      syncComboboxInputsWithState();
+    }
+
+    /*************************************************************************
+     * 6B. ROUTE-ONLY STOPPING JUNCTIONS COMBOBOX ENGINE (FROM & TO)
+     *     Strictly shows ONLY stopping junctions where the active train stops
+     *     from Origin to Destination (no unrelated off-route locations).
+     *************************************************************************/
+    const comboboxHighlight = { FROM: 0, TO: 0 };
+
+    function getCurrentRouteIndices(train) {
+      const stns = train.stations;
+      let fromIdx = state.boardingStation === 'ALL'
+        ? 0
+        : stns.findIndex(s => s.code === state.boardingStation);
+      if (fromIdx < 0 || fromIdx >= stns.length - 1) fromIdx = 0;
+
+      let toIdx = state.destinationStation === 'ALL'
+        ? stns.length - 1
+        : stns.findIndex(s => s.code === state.destinationStation);
+      if (toIdx <= fromIdx || toIdx >= stns.length) toIdx = stns.length - 1;
+
+      return { fromIdx, toIdx };
+    }
+
+    function syncComboboxInputsWithState() {
+      const train = getActiveTrain();
+      if (!train) return;
+      const stns = train.stations;
+      const { fromIdx, toIdx } = getCurrentRouteIndices(train);
+
+      const fromStn = stns[fromIdx];
+      const toStn = stns[toIdx];
+
+      const fromInput = document.getElementById('fromStationInput');
+      const toInput = document.getElementById('toStationInput');
+
+      if (fromInput && fromStn) {
+        fromInput.value = `${fromStn.code} - ${fromStn.name}`;
+      }
+      if (toInput && toStn) {
+        toInput.value = `${toStn.code} - ${toStn.name}`;
+      }
+
+      const fromCountLbl = document.getElementById('fromStopsCountLabel');
+      const toCountLbl = document.getElementById('toStopsCountLabel');
+      if (fromCountLbl) {
+        fromCountLbl.textContent = `${stns.length - 1} Boarding Stops`;
+      }
+      if (toCountLbl) {
+        const onwardCount = Math.max(1, (stns.length - 1) - fromIdx);
+        toCountLbl.textContent = `${onwardCount} Onward Halts after ${fromStn.code}`;
+      }
+
+      const boardingEl = document.getElementById('boardingStation');
+      const destEl = document.getElementById('destinationStation');
+      if (boardingEl) boardingEl.value = state.boardingStation;
+      if (destEl) destEl.value = state.destinationStation;
+    }
+
+    function openStationCombobox(role) {
+      const otherRole = role === 'FROM' ? 'TO' : 'FROM';
+      document.getElementById(otherRole === 'FROM' ? 'fromSuggestDropdown' : 'toSuggestDropdown')?.classList.add('hidden');
+
+      const inputEl = document.getElementById(role === 'FROM' ? 'fromStationInput' : 'toStationInput');
+      if (inputEl) inputEl.select();
+      comboboxHighlight[role] = 0;
+      renderStationSuggestions(role, '');
+    }
+
+    function toggleStationCombobox(role, evt) {
+      if (evt) evt.stopPropagation();
+      const dropdown = document.getElementById(role === 'FROM' ? 'fromSuggestDropdown' : 'toSuggestDropdown');
+      if (!dropdown) return;
+      if (dropdown.classList.contains('hidden')) {
+        openStationCombobox(role);
+      } else {
+        dropdown.classList.add('hidden');
+        syncComboboxInputsWithState();
+      }
+    }
+
+    function clearStationCombobox(role, evt) {
+      if (evt) evt.stopPropagation();
+      const inputEl = document.getElementById(role === 'FROM' ? 'fromStationInput' : 'toStationInput');
+      if (inputEl) {
+        inputEl.value = '';
+        inputEl.focus();
+      }
+      comboboxHighlight[role] = 0;
+      renderStationSuggestions(role, '');
+    }
+
+    function onStationComboboxInput(role, rawQuery) {
+      comboboxHighlight[role] = 0;
+      renderStationSuggestions(role, rawQuery);
+    }
+
+    function renderStationSuggestions(role, rawQuery) {
+      const train = getActiveTrain();
+      if (!train) return;
+
+      const dropdown = document.getElementById(role === 'FROM' ? 'fromSuggestDropdown' : 'toSuggestDropdown');
+      if (!dropdown) return;
+
+      const stns = train.stations;
+      const { fromIdx, toIdx } = getCurrentRouteIndices(train);
+      const q = (rawQuery || '').trim().toLowerCase();
+
+      // Strictly filter ONLY the stopping junctions where this train stops:
+      // - For FROM (Boarding): Origin (idx 0) up to penultimate stop (stns.length - 2)
+      // - For TO (Destination): Stopping junctions AFTER the selected Boarding stop (idx > fromIdx) up to Final Destination (stns.length - 1)
+      const validRoutePool = stns
+        .map((s, idx) => ({ ...s, stopIndex: idx, stopNumber: idx + 1, totalStops: stns.length }))
+        .filter(s => {
+          if (role === 'FROM') {
+            return s.stopIndex < stns.length - 1;
+          } else {
+            return s.stopIndex > fromIdx;
+          }
+        });
+
+      const matchingStops = validRoutePool.filter(s => {
+        if (!q) return true;
+        return s.code.toLowerCase().includes(q) || s.name.toLowerCase().includes(q);
+      });
+
+      const originStn = stns[0];
+      const finalStn = stns[stns.length - 1];
+      const activeFromStn = stns[fromIdx];
+
+      let html = '';
+
+      if (role === 'FROM') {
+        html += `
+          <div class="px-3.5 py-2 bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider flex items-center justify-between sticky top-0 z-10">
+            <span><i class="fa-solid fa-train-subway text-orange-400 mr-1.5"></i>Train ${train.trainNo} Stopping Junctions (${originStn.code} → ${finalStn.code})</span>
+            <span class="font-mono text-amber-300">${matchingStops.length} Boarding Halts</span>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="px-3.5 py-2 bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider flex items-center justify-between sticky top-0 z-10">
+            <span><i class="fa-solid fa-flag-checkered text-orange-400 mr-1.5"></i>Stopping Junctions from ${activeFromStn.code} to ${finalStn.code}</span>
+            <span class="font-mono text-emerald-300">${matchingStops.length} Onward Halts</span>
+          </div>
+        `;
+      }
+
+      if (matchingStops.length > 0) {
+        html += matchingStops.map((stn, idx) => {
+          const isSelected = (role === 'FROM' && stn.stopIndex === fromIdx) ||
+                             (role === 'TO' && stn.stopIndex === toIdx);
+          const distFromBoarding = role === 'TO'
+            ? Math.max(0, stn.km - activeFromStn.km)
+            : stn.km;
+
+          let roleBadge = '';
+          if (stn.stopIndex === 0) {
+            roleBadge = `<span class="ml-1.5 px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 text-[9px] font-extrabold uppercase">Origin</span>`;
+          } else if (stn.stopIndex === stns.length - 1) {
+            roleBadge = `<span class="ml-1.5 px-1.5 py-0.2 rounded bg-orange-100 text-orange-800 text-[9px] font-extrabold uppercase">Final Dest</span>`;
+          } else {
+            roleBadge = `<span class="ml-1.5 px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 text-[9px] font-bold uppercase">Halt #${stn.stopNumber}</span>`;
+          }
+
+          return `
+            <button
+              type="button"
+              data-suggest-item="true"
+              onclick="selectRouteStationForRole('${role}', '${stn.code}')"
+              class="w-full text-left px-3.5 py-2.5 hover:bg-orange-50 transition flex items-center justify-between gap-2 cursor-pointer ${
+                isSelected ? 'bg-orange-50/80 border-l-4 border-orange-500' : (idx === 0 && q ? 'suggest-item-active' : '')
+              }"
+            >
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-12 text-center py-1 rounded-lg ${
+                  isSelected ? 'bg-orange-500 text-white' : 'bg-irctc-navy text-amber-300'
+                } font-mono font-extrabold text-xs shrink-0 shadow-2xs">
+                  ${stn.code}
+                </span>
+                <div class="truncate">
+                  <div class="text-xs font-extrabold text-slate-800 truncate flex items-center">
+                    <span>${stn.name}</span>
+                    ${roleBadge}
+                    ${isSelected ? '<span class="ml-1.5 text-[10px] text-orange-600 font-extrabold">✓ Active</span>' : ''}
+                  </div>
+                  <div class="text-[10px] text-slate-500 font-mono mt-0.5">
+                    ${stn.arr === 'Origin' ? 'Starts Origin' : 'Arr: ' + stn.arr} • ${stn.dep === 'Dest' ? 'Terminates' : 'Dep: ' + stn.dep}
+                  </div>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[10px] font-mono font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                  ${role === 'TO' ? '+' + distFromBoarding + ' km' : stn.km + ' km'}
+                </span>
+              </div>
+            </button>
+          `;
+        }).join('');
+      } else {
+        const earlierStopOnSameTrain = role === 'TO' && q
+          ? stns.find((s, idx) => idx <= fromIdx && (s.code.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)))
+          : null;
+
+        if (earlierStopOnSameTrain) {
+          html += `
+            <div class="p-3.5 text-xs text-amber-900 bg-amber-50 space-y-2">
+              <div class="font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-info text-amber-600"></i>
+                <span><strong>${earlierStopOnSameTrain.code} (${earlierStopOnSameTrain.name})</strong> is an earlier stop on Train ${train.trainNo} before Boarding station <strong>${activeFromStn.code}</strong>.</span>
+              </div>
+              <button
+                type="button"
+                onclick="selectRouteStationForRole('FROM', '${originStn.code}'); selectRouteStationForRole('TO', '${earlierStopOnSameTrain.code}')"
+                class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-extrabold cursor-pointer"
+              >
+                Set Route: ${originStn.code} → ${earlierStopOnSameTrain.code}
+              </button>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="p-4 text-center space-y-1.5">
+              <div class="text-xs font-extrabold text-slate-700">
+                <i class="fa-solid fa-ban text-rose-500 mr-1"></i>
+                Train ${train.trainNo} does not stop at "${escapeHtmlText(rawQuery)}"
+              </div>
+              <p class="text-[11px] text-slate-500">
+                Only official stopping junctions on <strong>${originStn.code} → ${finalStn.code}</strong> are shown (${validRoutePool.map(s => s.code).join(', ')}).
+              </p>
+            </div>
+          `;
+        }
+      }
+
+      dropdown.innerHTML = html;
+      dropdown.classList.remove('hidden');
+    }
+
+    function escapeHtmlText(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function handleStationComboboxKeydown(evt, role) {
+      const dropdown = document.getElementById(role === 'FROM' ? 'fromSuggestDropdown' : 'toSuggestDropdown');
+      if (evt.key === 'Escape') {
+        dropdown?.classList.add('hidden');
+        syncComboboxInputsWithState();
+        return;
+      }
+
+      if (evt.key === 'Enter') {
+        evt.preventDefault();
+        const inputEl = document.getElementById(role === 'FROM' ? 'fromStationInput' : 'toStationInput');
+        const raw = (inputEl?.value || '').trim();
+        const train = getActiveTrain();
+        const stns = train.stations;
+        const { fromIdx } = getCurrentRouteIndices(train);
+
+        if (!raw) {
+          selectRouteStationForRole(role, role === 'FROM' ? stns[0].code : stns[stns.length - 1].code);
+          return;
+        }
+
+        const q = raw.toLowerCase();
+        const validPool = stns.filter((s, idx) => role === 'FROM' ? idx < stns.length - 1 : idx > fromIdx);
+        const routeMatch = validPool.find(s =>
+          s.code.toLowerCase() === q ||
+          s.code.toLowerCase().startsWith(q) ||
+          s.name.toLowerCase().includes(q)
+        );
+
+        if (routeMatch) {
+          selectRouteStationForRole(role, routeMatch.code);
+        } else {
+          showToast(`Select a valid stopping junction on Train ${train.trainNo}'s route`);
+          syncComboboxInputsWithState();
+          dropdown?.classList.add('hidden');
+        }
+      }
+    }
+
+    function selectRouteStationForRole(role, stnCode) {
+      const train = getActiveTrain();
+      if (!train) return;
+
+      const stns = train.stations;
+      const pickedIdx = stns.findIndex(s => s.code === stnCode);
+      if (pickedIdx === -1) return;
+
+      let { fromIdx: currFromIdx, toIdx: currToIdx } = getCurrentRouteIndices(train);
+
+      if (role === 'FROM') {
+        if (pickedIdx >= stns.length - 1) {
+          currFromIdx = Math.max(0, stns.length - 2);
+          currToIdx = stns.length - 1;
+        } else {
+          currFromIdx = pickedIdx;
+          if (currToIdx <= currFromIdx) {
+            currToIdx = stns.length - 1;
+          }
+        }
+      } else {
+        if (pickedIdx <= currFromIdx) {
+          currFromIdx = 0;
+          currToIdx = Math.max(1, pickedIdx);
+        } else {
+          currToIdx = pickedIdx;
+        }
+      }
+
+      state.boardingStation = currFromIdx === 0 ? 'ALL' : stns[currFromIdx].code;
+      state.destinationStation = currToIdx === stns.length - 1 ? 'ALL' : stns[currToIdx].code;
+
+      document.getElementById('fromSuggestDropdown')?.classList.add('hidden');
+      document.getElementById('toSuggestDropdown')?.classList.add('hidden');
+
+      syncComboboxInputsWithState();
+      recalculateAllBerthStatuses();
+      refreshChartDisplay();
+      showToast(`Route Segment: ${stns[currFromIdx].code} (${stns[currFromIdx].name}) → ${stns[currToIdx].code} (${stns[currToIdx].name})`);
+    }
+
+    function swapFromAndToStations() {
+      const train = getActiveTrain();
+      if (!train) return;
+      const stns = train.stations;
+
+      const maxKm = stns[stns.length - 1].km;
+      train.stations = stns.slice().reverse().map((s, idx, arr) => ({
+        code: s.code,
+        name: s.name,
+        arr: idx === 0 ? 'Origin' : s.dep,
+        dep: idx === arr.length - 1 ? 'Dest' : s.arr,
+        km: Math.max(0, maxKm - s.km)
+      }));
+
+      const oldFrom = state.boardingStation;
+      const oldTo = state.destinationStation;
+
+      populateStationDropdowns(train);
+
+      state.boardingStation = oldTo === 'ALL' ? 'ALL' : oldTo;
+      state.destinationStation = oldFrom === 'ALL' ? 'ALL' : oldFrom;
+
+      train.coaches.forEach((coach, idx) => {
+        coach.berths = buildCoachBerths(coach.id, coach.classCode, train.stations, train.seed + 7, idx + 1);
+      });
+
+      syncComboboxInputsWithState();
+      recalculateAllBerthStatuses();
+      refreshChartDisplay();
+      showToast(`Swapped Route Direction: ${train.stations[0].code} → ${train.stations[train.stations.length - 1].code}`);
+    }
+
+    function resetRouteSegmentToFull() {
+      state.boardingStation = 'ALL';
+      state.destinationStation = 'ALL';
+      syncComboboxInputsWithState();
+      recalculateAllBerthStatuses();
+      refreshChartDisplay();
+      showToast('Checking Full Train Route (Origin to Destination)');
+    }
+
+    function handleStationSegmentChange() {
+      const train = getActiveTrain();
+      const bVal = document.getElementById('boardingStation').value;
+      const dVal = document.getElementById('destinationStation').value;
+
+      if (bVal !== 'ALL' && dVal !== 'ALL') {
+        const bIdx = train.stations.findIndex(s => s.code === bVal);
+        const dIdx = train.stations.findIndex(s => s.code === dVal);
+        if (bIdx >= dIdx) {
+          showToast('Destination stop must be after Boarding stop on route');
+          document.getElementById('destinationStation').value = 'ALL';
+          state.destinationStation = 'ALL';
+          state.boardingStation = bVal;
+        } else {
+          state.boardingStation = bVal;
+          state.destinationStation = dVal;
+        }
+      } else {
+        state.boardingStation = bVal;
+        state.destinationStation = dVal;
+      }
+
+      recalculateAllBerthStatuses();
+      refreshChartDisplay();
+    }
+
+    /*************************************************************************
+     * 7. RENDER PIPELINE: DATE STATUS, FAST-TRACK BAR, COACH MAP & TABLE
+     *************************************************************************/
+    function refreshChartDisplay() {
+      const train = getActiveTrain();
+      if (!train) return;
+
+      document.getElementById('trainTypeBadge').textContent = train.typeTag;
+      document.getElementById('activeTrainFullTitle').textContent = `${train.trainNo} - ${train.trainName}`;
+      document.getElementById('activeTrainHeaderLabel').textContent =
+        `${train.trainNo} ${train.trainName} (${state.journeyDate}) — Click Coach to Inspect`;
+
+      // Even/Odd Date Parity Badge
+      const dayInt = parseInt((state.journeyDate || '2026-10-27').split('-')[2], 10) || 27;
+      const isEvenDate = (dayInt % 2 === 0);
+      const parityEl = document.getElementById('dateParityBadge');
+      parityEl.textContent = isEvenDate ? `EVEN DATE (${state.journeyDate})` : `ODD DATE (${state.journeyDate})`;
+      parityEl.className = isEvenDate
+        ? 'px-2.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-300 font-bold'
+        : 'px-2.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold';
+
+      renderChartDateStatusBanner(train);
+      renderRouteTimelineStrip(train);
+      renderFastTrackControlsAndRatio(train);
+      renderFastTrackVerdictCard();
+      renderSplitSeatSmartChains(train);
+      renderClassSummaryCards(train);
+      renderCoachSelectorStrip(train);
+      renderVisualCoachLayout();
+      renderBerthInspector();
+      renderVacancyTable();
+    }
+
+    function renderChartDateStatusBanner(train) {
+      const container = document.getElementById('chartStatusBannerContainer');
+      const todayStr = '2026-10-27';
+      const selDate = state.journeyDate;
+
+      if (selDate <= todayStr) {
+        container.innerHTML = `
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-extrabold">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span>1st &amp; 2nd Chart: PREPARED</span>
+          </div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-xs font-extrabold">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+            <span>Current Counter (CURR_AVBL) &amp; TTE HHT Sync: LIVE</span>
+          </div>
+        `;
+      } else {
+        // Future Date Selected
+        container.innerHTML = `
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-xs font-extrabold">
+            <i class="fa-solid fa-clock-rotate-left text-amber-700"></i>
+            <span>Future Date (${selDate}): Official Chart Prepares 4 Hrs Before ${train.stations[0].dep}</span>
+          </div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-indigo-100 border border-indigo-300 text-indigo-900 text-xs font-extrabold">
+            <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
+            <span>Simulated Prepared Chart Preview Active for ${selDate}</span>
+          </div>
+        `;
+      }
+    }
+
+    function renderRouteTimelineStrip(train) {
+      const strip = document.getElementById('routeStopsStrip');
+      const fromCode = state.boardingStation === 'ALL' ? train.stations[0].code : state.boardingStation;
+      const toCode = state.destinationStation === 'ALL' ? train.stations[train.stations.length - 1].code : state.destinationStation;
+      const fromIdx = Math.max(0, train.stations.findIndex(s => s.code === fromCode));
+      const toIdx = Math.max(fromIdx + 1, train.stations.findIndex(s => s.code === toCode));
+
+      document.getElementById('selectedSegmentLabel').textContent =
+        `${fromCode} → ${toCode} (${train.stations[toIdx].km - train.stations[fromIdx].km} km)`;
+
+      strip.innerHTML = `<span class="text-[10px] font-extrabold uppercase text-slate-400 mr-1 shrink-0"><i class="fa-solid fa-route text-orange-500 mr-1"></i>Click Stop:</span>` +
+        train.stations.map((stn, idx) => {
+          const inWindow = idx >= fromIdx && idx <= toIdx;
+          const isFrom = idx === fromIdx;
+          const isTo = idx === toIdx;
+          const isEndpoint = isFrom || isTo;
+
+          let pillClass = 'bg-white hover:bg-slate-100 text-slate-500 border-slate-200';
+          if (isFrom) {
+            pillClass = 'bg-emerald-600 text-white border-emerald-700 font-extrabold shadow-2xs';
+          } else if (isTo) {
+            pillClass = 'bg-orange-500 text-white border-orange-600 font-extrabold shadow-2xs';
+          } else if (inWindow) {
+            pillClass = 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-300 font-bold';
+          }
+
+          const roleHint = isFrom ? 'FROM: ' : (isTo ? 'TO: ' : '');
+          const arrow = idx < train.stations.length - 1
+            ? `<i class="fa-solid fa-chevron-right text-[9px] ${idx >= fromIdx && idx < toIdx ? 'text-emerald-500' : 'text-slate-300'} mx-0.5"></i>`
+            : '';
+
+          return `
+            <div class="inline-flex items-center shrink-0">
+              <button
+                type="button"
+                onclick="handleRoutePillClick('${stn.code}', ${idx})"
+                class="px-2 py-0.5 rounded-md border ${pillClass} text-[11px] font-mono transition cursor-pointer"
+                title="Click to set ${stn.name} (${stn.code}) on route (${stn.km} km)"
+              >
+                ${roleHint}${stn.code}
+              </button>
+              ${arrow}
+            </div>
+          `;
+        }).join('');
+    }
+
+    function handleRoutePillClick(stnCode, idx) {
+      const train = getActiveTrain();
+      const fromCode = state.boardingStation === 'ALL' ? train.stations[0].code : state.boardingStation;
+      const fromIdx = Math.max(0, train.stations.findIndex(s => s.code === fromCode));
+
+      if (idx <= fromIdx && idx < train.stations.length - 1) {
+        selectRouteStationForRole('FROM', stnCode);
+      } else {
+        selectRouteStationForRole('TO', stnCode);
+      }
+    }
+
+    /*************************************************************************
+     * 8. FAST-TRACK INSTANT SEAT & BERTH CHECKER + RATIO BAR
+     *************************************************************************/
+    function renderFastTrackControlsAndRatio(train) {
+      let totalAvail = 0;
+      let totalPartial = 0;
+      let totalBooked = 0;
+      let totalLowerAvail = 0;
+
+      train.coaches.forEach(coach => {
+        coach.berths.forEach(b => {
+          if (b.status === 'FULL') {
+            totalAvail++;
+            if (b.berthType === 'LB') totalLowerAvail++;
+          } else if (b.status === 'PARTIAL') {
+            totalPartial++;
+          } else {
+            totalBooked++;
+          }
+        });
+      });
+
+      const grandTotal = Math.max(1, totalAvail + totalPartial + totalBooked);
+      const availPct = Math.round((totalAvail / grandTotal) * 100);
+      const partialPct = Math.round((totalPartial / grandTotal) * 100);
+      const bookedPct = Math.max(0, 100 - availPct - partialPct);
+
+      document.getElementById('ftLowerCount').textContent = totalLowerAvail;
+      document.getElementById('ftFullCount').textContent = totalAvail;
+
+      document.getElementById('ratioAvailCount').textContent = totalAvail;
+      document.getElementById('ratioAvailPct').textContent = `${availPct}%`;
+      document.getElementById('ratioPartialCount').textContent = totalPartial;
+      document.getElementById('ratioPartialPct').textContent = `${partialPct}%`;
+      document.getElementById('ratioBookedCount').textContent = totalBooked;
+      document.getElementById('ratioBookedPct').textContent = `${bookedPct}%`;
+
+      document.getElementById('ratioBarAvail').style.width = `${availPct}%`;
+      document.getElementById('ratioBarPartial').style.width = `${partialPct}%`;
+      document.getElementById('ratioBarBooked').style.width = `${bookedPct}%`;
+
+      // Populate Fast-Track Coach Select & Seat Input Bounds
+      const coachSelect = document.getElementById('fastCoachSelect');
+      if (coachSelect) {
+        coachSelect.innerHTML = train.coaches.map(c => {
+          const cAvail = c.berths.filter(b => b.status === 'FULL').length;
+          return `<option value="${c.id}" ${c.id === state.activeCoachId ? 'selected' : ''}>${c.id} (${c.classCode}) — ${cAvail} Avail</option>`;
+        }).join('');
+      }
+
+      const activeCoach = getActiveCoach();
+      const maxSeats = activeCoach.berths.length;
+      const seatInput = document.getElementById('fastSeatInput');
+      if (seatInput) {
+        seatInput.max = maxSeats;
+        if (state.selectedBerthNo > maxSeats) state.selectedBerthNo = 1;
+        seatInput.value = state.selectedBerthNo;
+      }
+
+      const maxHint = document.getElementById('fastMaxSeatHint');
+      if (maxHint) {
+        maxHint.textContent = `(1–${maxSeats})`;
+      }
+    }
+
+    function handleFastCoachChange(coachId) {
+      const t0 = performance.now();
+      state.activeCoachId = coachId;
+      const activeCoach = getActiveCoach();
+      if (state.selectedBerthNo > activeCoach.berths.length) {
+        state.selectedBerthNo = 1;
+      }
+      refreshChartDisplay();
+      const elapsed = Math.max(0.2, (performance.now() - t0)).toFixed(1);
+      const badge = document.getElementById('fastTrackLatencyBadge');
+      if (badge) badge.textContent = `⚡ ${elapsed} ms Lookup`;
+    }
+
+    function handleFastSeatInput(val) {
+      const t0 = performance.now();
+      const activeCoach = getActiveCoach();
+      const maxSeats = activeCoach.berths.length;
+      let num = parseInt(val, 10);
+      if (isNaN(num) || num < 1) num = 1;
+      if (num > maxSeats) num = maxSeats;
+      state.selectedBerthNo = num;
+
+      renderFastTrackVerdictCard();
+      renderVisualCoachLayout();
+      renderBerthInspector();
+
+      const elapsed = Math.max(0.2, (performance.now() - t0)).toFixed(1);
+      const badge = document.getElementById('fastTrackLatencyBadge');
+      if (badge) badge.textContent = `⚡ ${elapsed} ms Lookup`;
+    }
+
+    function stepFastSeat(delta) {
+      const activeCoach = getActiveCoach();
+      const maxSeats = activeCoach.berths.length;
+      let next = state.selectedBerthNo + delta;
+      if (next < 1) next = maxSeats;
+      if (next > maxSeats) next = 1;
+      state.selectedBerthNo = next;
+      const seatInput = document.getElementById('fastSeatInput');
+      if (seatInput) seatInput.value = next;
+      handleFastSeatInput(next);
+    }
+
+    function jumpToNextVacantInCoach() {
+      const coach = getActiveCoach();
+      const total = coach.berths.length;
+      for (let offset = 1; offset <= total; offset++) {
+        const candidateIdx = (state.selectedBerthNo - 1 + offset) % total;
+        const b = coach.berths[candidateIdx];
+        if (b.status === 'FULL' || b.status === 'PARTIAL') {
+          state.selectedBerthNo = b.berthNo;
+          const seatInput = document.getElementById('fastSeatInput');
+          if (seatInput) seatInput.value = b.berthNo;
+          handleFastSeatInput(b.berthNo);
+          showToast(`Jumped to Coach ${coach.id} Seat #${b.berthNo} (${b.status === 'FULL' ? 'Available' : 'Partial Vacant'})`);
+          return;
+        }
+      }
+      showToast(`No vacant seats found in Coach ${coach.id} for this segment`);
+    }
+
+    function renderFastTrackVerdictCard() {
+      const train = getActiveTrain();
+      const coach = getActiveCoach();
+      const berth = coach.berths.find(b => b.berthNo === state.selectedBerthNo) || coach.berths[0];
+      const berthMeta = BERTH_TYPE_LABELS[berth.berthType] || { short: berth.berthType, full: berth.berthType };
+      const card = document.getElementById('fastVerdictCard');
+
+      let badgeHtml = '';
+      let cardBorder = 'border-slate-700';
+      let summaryText = '';
+
+      if (berth.status === 'FULL') {
+        cardBorder = 'border-emerald-500/80';
+        const seg = berth.vacantSegments[0] || { fromCode: train.stations[0].code, toCode: train.stations[train.stations.length - 1].code, km: 500 };
+        const fare = calculateDiscountedCurrentFare(berth.classCode, seg.km);
+        badgeHtml = `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 font-extrabold text-xs tracking-wide shadow">
+            <i class="fa-solid fa-circle-check"></i> AVAILABLE (VACANT)
+          </span>
+        `;
+        summaryText = `Vacant across your selected journey. Eligible for Current Booking (Est. ₹${fare}) or TTE On-Board Allotment.`;
+      } else if (berth.status === 'PARTIAL') {
+        cardBorder = 'border-amber-500/80';
+        const vList = berth.vacantSegments.map(s => `${s.fromCode}→${s.toCode}`).join(', ');
+        badgeHtml = `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400 text-slate-950 font-extrabold text-xs tracking-wide shadow">
+            <i class="fa-solid fa-clock"></i> PARTIAL SEGMENT AVAILABLE
+          </span>
+        `;
+        summaryText = `Free between [${vList}], and Booked on other legs. Inspect the stop-by-stop bar below.`;
+      } else {
+        cardBorder = 'border-rose-500/80';
+        badgeHtml = `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-600 text-white font-extrabold text-xs tracking-wide shadow">
+            <i class="fa-solid fa-lock"></i> BOOKED / OCCUPIED
+          </span>
+        `;
+        summaryText = `Occupied on the reservation chart for your selected segment. Click "Jump to Next Available Seat" to find an open berth.`;
+      }
+
+      card.className = `lg:col-span-8 bg-slate-900/95 rounded-xl p-4 border-2 ${cardBorder} flex flex-col justify-between space-y-3`;
+
+      // Stop-by-Stop Visual Segment Occupancy Bar
+      const legsHtml = berth.legVacant.map((isVac, idx) => {
+        const stA = train.stations[idx];
+        const stB = train.stations[idx + 1];
+        return `
+          <div class="flex-1 min-w-[68px] p-1.5 rounded-lg border text-center ${
+            isVac
+              ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+              : 'bg-rose-600/20 border-rose-500/40 text-rose-300'
+          }">
+            <div class="text-[10px] font-mono font-extrabold">${stA.code}→${stB.code}</div>
+            <div class="text-[9px] uppercase font-bold mt-0.5 ${isVac ? 'text-emerald-400' : 'text-rose-400'}">
+              ${isVac ? '● AVAILABLE' : '✕ BOOKED'}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-lg sm:text-xl font-mono font-extrabold text-white">
+                Coach ${berth.coachId} • Seat #${berth.berthNo}
+              </span>
+              <span class="px-2.5 py-0.5 rounded-md bg-slate-800 text-amber-300 border border-slate-700 text-xs font-mono font-bold">
+                ${berthMeta.full} (${berth.berthType}) • Bay ${berth.bay}
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 mt-1">${summaryText}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            ${badgeHtml}
+          </div>
+        </div>
+
+        <!-- Stop-by-Stop Segment Bar -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span>Stop-by-Stop Seat Status (${train.stations[0].code} to ${train.stations[train.stations.length - 1].code})</span>
+            <span>Green = Available • Red = Booked</span>
+          </div>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+            ${legsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    // Split-Seat Smart Chain Finder (Pairs 2 partial berths to cover full route)
+    function renderSplitSeatSmartChains(train) {
+      const chains = [];
+      const numLegs = train.stations.length - 1;
+
+      // Scan coaches for pairs of berths where Berth A covers 0..split and Berth B covers split..numLegs
+      train.coaches.forEach(coach => {
+        const partials = coach.berths.filter(b => b.status === 'PARTIAL');
+        for (let i = 0; i < partials.length; i++) {
+          for (let j = 0; j < partials.length; j++) {
+            if (i === j) continue;
+            const b1 = partials[i];
+            const b2 = partials[j];
+
+            // Find if b1 + b2 cover all legs from 0 to numLegs - 1
+            let coversAll = true;
+            let handoverIdx = -1;
+            for (let l = 0; l < numLegs; l++) {
+              if (!b1.legVacant[l] && !b2.legVacant[l]) {
+                coversAll = false;
+                break;
+              }
+              if (b1.legVacant[l] && !b2.legVacant[l]) {
+                handoverIdx = l + 1;
+              }
+            }
+            if (coversAll && handoverIdx > 0 && handoverIdx < numLegs && b1.legVacant[0] && b2.legVacant[numLegs - 1]) {
+              chains.push({
+                coachId: coach.id,
+                classCode: coach.classCode,
+                berth1: b1,
+                berth2: b2,
+                handoverStation: train.stations[handoverIdx]
+              });
+              if (chains.length >= 6) break;
+            }
+          }
+          if (chains.length >= 6) break;
+        }
+      });
+
+      document.getElementById('ftChainCount').textContent = chains.length;
+      const grid = document.getElementById('splitChainCardsGrid');
+
+      if (chains.length === 0) {
+        grid.innerHTML = `<div class="col-span-3 text-xs text-slate-400">Plenty of direct full-route berths are available on this train.</div>`;
+        return;
+      }
+
+      grid.innerHTML = chains.slice(0, 3).map(ch => `
+        <div class="p-3 rounded-xl bg-slate-800/90 border border-amber-500/30 flex flex-col justify-between space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-extrabold text-amber-300">Coach ${ch.coachId} (${ch.classCode}) Same-Coach Chain</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">100% Route Covered</span>
+          </div>
+          <div class="space-y-1 text-[11px] text-slate-200 font-mono">
+            <div>1️⃣ <strong>Seat #${ch.berth1.berthNo} (${ch.berth1.berthType})</strong>: ${train.stations[0].code} → ${ch.handoverStation.code}</div>
+            <div>2️⃣ <strong>Seat #${ch.berth2.berthNo} (${ch.berth2.berthType})</strong>: ${ch.handoverStation.code} → ${train.stations[train.stations.length - 1].code}</div>
+          </div>
+          <button
+            onclick="jumpToCoachBerth('${ch.coachId}', ${ch.berth1.berthNo})"
+            class="w-full py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px] transition cursor-pointer"
+          >
+            Inspect Chain in Coach ${ch.coachId}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function toggleSplitChainPanel() {
+      const el = document.getElementById('splitChainDrawer');
+      el.classList.toggle('hidden');
+    }
+
+    function toggleRatioBar() {
+      const el = document.getElementById('ratioSummaryBox');
+      el.classList.toggle('hidden');
+    }
+
+    function triggerFastQuickFilter(mode) {
+      if (mode === 'LOWER_AVAILABLE') {
+        document.getElementById('filterBerthType').value = 'LB';
+        document.getElementById('filterVacancyType').value = 'FULL';
+        applyFilters();
+        showToast('Filtered to Available Lower Berths (LB)');
+      } else if (mode === 'FULL_VACANT') {
+        document.getElementById('filterBerthType').value = 'ALL';
+        document.getElementById('filterVacancyType').value = 'FULL';
+        applyFilters();
+        showToast('Filtered to Full-Journey Available Seats');
+      }
+    }
+
+    /*************************************************************************
+     * 9. CLASS SUMMARY CARDS & COACH SELECTOR STRIP
+     *************************************************************************/
+    function renderClassSummaryCards(train) {
+      const grid = document.getElementById('classSummaryGrid');
+      const classKeys = ['1A', '2A', '3A', '3E', 'SL', 'CC'];
+
+      grid.innerHTML = classKeys.map(clsKey => {
+        const meta = CLASS_META[clsKey];
+        const coachesOfClass = train.coaches.filter(c => c.classCode === clsKey);
+        let fullCount = 0;
+        let partialCount = 0;
+        let bookedCount = 0;
+
+        coachesOfClass.forEach(coach => {
+          coach.berths.forEach(b => {
+            if (b.status === 'FULL') fullCount++;
+            else if (b.status === 'PARTIAL') partialCount++;
+            else bookedCount++;
+          });
+        });
+
+        const isSelected = state.selectedClass === clsKey;
+
+        return `
+          <button
+            onclick="selectClassFilter('${clsKey}')"
+            class="text-left p-3.5 rounded-xl border-2 transition relative overflow-hidden cursor-pointer flex flex-col justify-between ${
+              isSelected
+                ? 'bg-irctc-navy text-white border-orange-500 shadow-md scale-[1.01]'
+                : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 hover:border-slate-300 shadow-2xs'
+            }"
+          >
+            <div class="flex items-start justify-between gap-2 w-full">
+              <div>
+                <span class="inline-block text-xs font-mono font-extrabold px-2 py-0.5 rounded ${
+                  isSelected ? 'bg-orange-500 text-white' : 'bg-slate-900 text-white'
+                }">
+                  ${meta.code}
+                </span>
+                <h4 class="text-xs font-bold mt-1.5 ${isSelected ? 'text-slate-100' : 'text-slate-700'}">
+                  ${meta.name}
+                </h4>
+              </div>
+              <div class="text-right">
+                <span class="text-xl font-extrabold font-mono leading-none ${
+                  fullCount > 0
+                    ? (isSelected ? 'text-emerald-300' : 'text-emerald-600')
+                    : 'text-slate-400'
+                }">
+                  ${fullCount}
+                </span>
+                <span class="block text-[10px] uppercase tracking-wider ${
+                  isSelected ? 'text-slate-300' : 'text-slate-400'
+                }">Avail</span>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2 border-t ${
+              isSelected ? 'border-slate-700' : 'border-slate-100'
+            } flex items-center justify-between text-[10px] font-mono font-bold w-full">
+              <span class="${isSelected ? 'text-amber-300' : 'text-amber-700'}">Split: ${partialCount}</span>
+              <span class="${isSelected ? 'text-rose-300' : 'text-rose-600'}">Booked: ${bookedCount}</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectClassFilter(clsKey) {
+      state.selectedClass = (state.selectedClass === clsKey && clsKey !== 'ALL') ? 'ALL' : clsKey;
+      const train = getActiveTrain();
+
+      if (state.selectedClass !== 'ALL') {
+        const matchingCoaches = train.coaches.filter(c => c.classCode === state.selectedClass);
+        if (matchingCoaches.length > 0 && !matchingCoaches.some(c => c.id === state.activeCoachId)) {
+          state.activeCoachId = matchingCoaches[0].id;
+          state.selectedBerthNo = 1;
+        }
+      }
+      refreshChartDisplay();
+    }
+
+    function renderCoachSelectorStrip(train) {
+      const strip = document.getElementById('coachSelectorStrip');
+      const filteredCoaches = state.selectedClass === 'ALL'
+        ? train.coaches
+        : train.coaches.filter(c => c.classCode === state.selectedClass);
+
+      const locoHtml = `
+        <div class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs font-mono">
+          <i class="fa-solid fa-train-subway text-orange-400"></i>
+          <span>LOCO</span>
+        </div>
+      `;
+
+      const coachesHtml = filteredCoaches.map(coach => {
+        const availCount = coach.berths.filter(b => b.status === 'FULL').length;
+        const partialCount = coach.berths.filter(b => b.status === 'PARTIAL').length;
+        const bookedCount = coach.berths.filter(b => b.status === 'BOOKED').length;
+        const isActive = coach.id === state.activeCoachId;
+
+        return `
+          <button
+            onclick="selectCoach('${coach.id}')"
+            class="shrink-0 px-3.5 py-2 rounded-xl border transition flex items-center gap-2.5 cursor-pointer ${
+              isActive
+                ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white border-orange-300 shadow-md scale-[1.02]'
+                : 'bg-slate-800/90 hover:bg-slate-800 text-slate-200 border-slate-700'
+            }"
+          >
+            <div class="text-left">
+              <div class="text-xs font-extrabold font-mono leading-none">${coach.id}</div>
+              <div class="text-[10px] ${isActive ? 'text-orange-100' : 'text-slate-400'} font-semibold mt-0.5">${coach.classCode}</div>
+            </div>
+            <div class="flex flex-col items-end text-[10px] font-mono leading-tight">
+              <span class="${isActive ? 'text-white font-extrabold' : 'text-emerald-400 font-bold'}">${availCount + partialCount} Avail</span>
+              <span class="${isActive ? 'text-orange-100' : 'text-rose-400'}">${bookedCount} Bkd</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      strip.innerHTML = locoHtml + coachesHtml;
+    }
+
+    function selectCoach(coachId) {
+      state.activeCoachId = coachId;
+      const coach = getActiveCoach();
+      const firstAvail = coach.berths.find(b => b.status !== 'BOOKED') || coach.berths[0];
+      state.selectedBerthNo = firstAvail.berthNo;
+      refreshChartDisplay();
+    }
+
+    /*************************************************************************
+     * 10. VISUAL COACH DIAGRAM (BOOKED VS AVAILABLE)
+     *************************************************************************/
+    function doesBerthMatchFilters(berth) {
+      if (state.filterBerthType !== 'ALL' && berth.berthType !== state.filterBerthType) {
+        return false;
+      }
+      if (state.filterVacancyType === 'VACANT_ANY' && berth.status === 'BOOKED') return false;
+      if (state.filterVacancyType === 'FULL' && berth.status !== 'FULL') return false;
+      if (state.filterVacancyType === 'PARTIAL' && berth.status !== 'PARTIAL') return false;
+      if (state.filterVacancyType === 'BOOKED' && berth.status !== 'BOOKED') return false;
+
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        const matchNum = String(berth.berthNo).includes(q);
+        const matchCoach = berth.coachId.toLowerCase().includes(q);
+        const matchType = berth.berthType.toLowerCase().includes(q);
+        const matchStn = berth.vacantSegments.some(s =>
+          s.fromCode.toLowerCase().includes(q) ||
+          s.toCode.toLowerCase().includes(q)
+        );
+        if (!matchNum && !matchCoach && !matchType && !matchStn) return false;
+      }
+      return true;
+    }
+
+    function renderBerthButton(berth) {
+      const isSelected = berth.berthNo === state.selectedBerthNo;
+      const matchesFilter = doesBerthMatchFilters(berth);
+
+      let colorClasses = '';
+      let statusLabel = '';
+
+      if (berth.status === 'FULL') {
+        colorClasses = 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-700 shadow-2xs';
+        statusLabel = 'AVAILABLE';
+      } else if (berth.status === 'PARTIAL') {
+        const seg = berth.vacantSegments[0];
+        colorClasses = 'bg-amber-500 hover:bg-amber-600 text-white border-amber-700 shadow-2xs';
+        statusLabel = seg ? `${seg.fromCode}→${seg.toCode}` : 'PARTIAL';
+      } else {
+        colorClasses = 'bg-rose-50 hover:bg-rose-100 text-rose-900 border-rose-300 booked-pattern';
+        statusLabel = 'BOOKED';
+      }
+
+      const ringClass = isSelected
+        ? 'ring-4 ring-irctc-navy ring-offset-2 scale-[1.04] z-10'
+        : '';
+
+      const dimClass = !matchesFilter ? 'opacity-20 saturate-0' : '';
+
+      return `
+        <button
+          onclick="inspectBerth(${berth.berthNo})"
+          class="berth-btn relative p-2 rounded-xl border-2 flex flex-col justify-between text-left cursor-pointer min-h-[56px] ${colorClasses} ${ringClass} ${dimClass}"
+          title="Coach ${berth.coachId} | Seat #${berth.berthNo} (${berth.berthType}) - ${statusLabel}"
+        >
+          <div class="flex items-center justify-between gap-1 w-full">
+            <span class="text-xs sm:text-sm font-extrabold font-mono leading-none">#${berth.berthNo}</span>
+            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+              berth.status === 'BOOKED' ? 'bg-rose-200/80 text-rose-900' : 'bg-black/20 text-white'
+            }">
+              ${berth.berthType}
+            </span>
+          </div>
+          <div class="mt-1.5 text-[10px] font-mono font-extrabold truncate w-full ${
+            berth.status === 'BOOKED' ? 'text-rose-700' : 'text-white'
+          }">
+            ${statusLabel}
+          </div>
+        </button>
+      `;
+    }
+
+    function renderVisualCoachLayout() {
+      const coach = getActiveCoach();
+      const meta = CLASS_META[coach.classCode];
+
+      document.getElementById('currentCoachIdLabel').textContent = coach.id;
+      document.getElementById('currentCoachClassLabel').textContent = coach.classCode;
+      document.getElementById('currentCoachTitle').textContent =
+        `Coach ${coach.id} — ${meta.name} (${coach.berths.length} Seats)`;
+      document.getElementById('currentCoachLayoutTag').textContent = meta.layout;
+
+      const fullCount = coach.berths.filter(b => b.status === 'FULL').length;
+      const partialCount = coach.berths.filter(b => b.status === 'PARTIAL').length;
+      const bookedCount = coach.berths.filter(b => b.status === 'BOOKED').length;
+
+      document.getElementById('coachFullVacantCount').textContent = fullCount;
+      document.getElementById('coachPartialVacantCount').textContent = partialCount;
+      document.getElementById('coachBookedCount').textContent = bookedCount;
+
+      const container = document.getElementById('visualCoachBaysContainer');
+
+      const baysMap = {};
+      coach.berths.forEach(b => {
+        if (!baysMap[b.bay]) baysMap[b.bay] = [];
+        baysMap[b.bay].push(b);
+      });
+
+      const bayKeys = Object.keys(baysMap).sort((a, b) => Number(a) - Number(b));
+
+      if (coach.classCode === '3A' || coach.classCode === '3E' || coach.classCode === 'SL') {
+        container.innerHTML = bayKeys.map(bayNo => {
+          const bayBerths = baysMap[bayNo];
+          const mainLeft = bayBerths.slice(0, 3);
+          const mainRight = bayBerths.slice(3, 6);
+          const sideBerths = bayBerths.slice(6, 8);
+
+          return `
+            <div class="bg-white rounded-xl p-3 border border-slate-300 shadow-2xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 font-mono">
+                  Bay ${bayNo} (Seats ${bayBerths[0].berthNo}–${bayBerths[bayBerths.length - 1].berthNo})
+                </span>
+                <span class="text-[10px] font-semibold text-slate-400">Main Compartment (6) • Corridor • Side Berths (2)</span>
+              </div>
+              <div class="grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-8 space-y-2 pr-2 border-r-2 border-dotted border-slate-300">
+                  <div class="grid grid-cols-3 gap-2">
+                    ${mainLeft.map(b => renderBerthButton(b)).join('')}
+                  </div>
+                  <div class="grid grid-cols-3 gap-2">
+                    ${mainRight.map(b => renderBerthButton(b)).join('')}
+                  </div>
+                </div>
+                <div class="col-span-1 flex flex-col items-center justify-center text-slate-300 text-[10px] font-mono select-none">
+                  <i class="fa-solid fa-arrows-up-down text-xs"></i>
+                  <span class="mt-1">AISLE</span>
+                </div>
+                <div class="col-span-3 space-y-2">
+                  ${sideBerths.map(b => renderBerthButton(b)).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else if (coach.classCode === '2A') {
+        container.innerHTML = bayKeys.map(bayNo => {
+          const bayBerths = baysMap[bayNo];
+          const mainLeft = bayBerths.slice(0, 2);
+          const mainRight = bayBerths.slice(2, 4);
+          const sideBerths = bayBerths.slice(4, 6);
+
+          return `
+            <div class="bg-white rounded-xl p-3 border border-slate-300 shadow-2xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 font-mono">
+                  2A Bay ${bayNo} (Seats ${bayBerths[0].berthNo}–${bayBerths[bayBerths.length - 1].berthNo})
+                </span>
+                <span class="text-[10px] font-semibold text-slate-400">4-Berth Main Bay • Aisle • 2-Berth Side</span>
+              </div>
+              <div class="grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-7 space-y-2 pr-2 border-r-2 border-dotted border-slate-300">
+                  <div class="grid grid-cols-2 gap-2.5">
+                    ${mainLeft.map(b => renderBerthButton(b)).join('')}
+                  </div>
+                  <div class="grid grid-cols-2 gap-2.5">
+                    ${mainRight.map(b => renderBerthButton(b)).join('')}
+                  </div>
+                </div>
+                <div class="col-span-1 flex flex-col items-center justify-center text-slate-300 text-[10px] font-mono">
+                  <i class="fa-solid fa-arrows-up-down"></i>
+                </div>
+                <div class="col-span-4 space-y-2">
+                  ${sideBerths.map(b => renderBerthButton(b)).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else if (coach.classCode === '1A') {
+        container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">` + bayKeys.map(bayNo => {
+          const bayBerths = baysMap[bayNo];
+          const isCoupe = bayBerths.length === 2;
+          const cabinLetter = String.fromCharCode(64 + Number(bayNo));
+
+          return `
+            <div class="bg-white rounded-xl p-3.5 border-2 border-slate-300 shadow-2xs flex flex-col justify-between">
+              <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-slate-100">
+                <span class="text-xs font-extrabold text-irctc-navy font-mono">
+                  <i class="fa-solid fa-door-closed text-orange-500 mr-1"></i>
+                  Cabin ${cabinLetter} (${isCoupe ? '2-Berth Coupe' : '4-Berth Cabin'})
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">Lockable</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                ${bayBerths.map(b => renderBerthButton(b)).join('')}
+              </div>
+            </div>
+          `;
+        }).join('') + `</div>`;
+      } else if (coach.classCode === 'CC') {
+        container.innerHTML = bayKeys.map(rowNo => {
+          const rowSeats = baysMap[rowNo];
+          const leftThree = rowSeats.slice(0, 3);
+          const rightTwo = rowSeats.slice(3, 5);
+
+          return `
+            <div class="bg-white rounded-xl p-2.5 border border-slate-300 flex items-center gap-2">
+              <div class="w-14 shrink-0 text-[11px] font-mono font-bold text-slate-400 text-center">
+                ROW ${rowNo}
+              </div>
+              <div class="flex-1 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-7 grid grid-cols-3 gap-2">
+                  ${leftThree.map(b => renderBerthButton(b)).join('')}
+                </div>
+                <div class="col-span-1 text-center text-[10px] font-mono text-slate-300">AISLE</div>
+                <div class="col-span-4 grid grid-cols-2 gap-2">
+                  ${rightTwo.map(b => renderBerthButton(b)).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    /*************************************************************************
+     * 11. SIDE BERTH INSPECTOR PANEL
+     *************************************************************************/
+    function inspectBerth(berthNo) {
+      state.selectedBerthNo = berthNo;
+      document.getElementById('fastSeatInput').value = berthNo;
+      renderFastTrackVerdictCard();
+      renderVisualCoachLayout();
+      renderBerthInspector();
+    }
+
+    function calculateDiscountedCurrentFare(classCode, km) {
+      const rate = CLASS_META[classCode]?.baseFarePerKm || 1.85;
+      const rawFare = Math.max(190, Math.round(km * rate));
+      return Math.round(rawFare * 0.9);
+    }
+
+    function renderBerthInspector() {
+      const train = getActiveTrain();
+      const coach = getActiveCoach();
+      const berth = coach.berths.find(b => b.berthNo === state.selectedBerthNo) || coach.berths[0];
+      const berthMeta = BERTH_TYPE_LABELS[berth.berthType] || { short: berth.berthType, full: berth.berthType };
+      const card = document.getElementById('berthInspectorCard');
+
+      let headerBg = 'bg-rose-700';
+      let statusBadge = '';
+
+      if (berth.status === 'FULL') {
+        headerBg = 'bg-gradient-to-r from-emerald-700 to-emerald-600';
+        statusBadge = `<span class="px-2.5 py-1 rounded-full bg-white text-emerald-900 text-xs font-extrabold">AVAILABLE</span>`;
+      } else if (berth.status === 'PARTIAL') {
+        headerBg = 'bg-gradient-to-r from-amber-600 to-orange-600';
+        statusBadge = `<span class="px-2.5 py-1 rounded-full bg-white text-amber-900 text-xs font-extrabold">PARTIAL AVAILABLE</span>`;
+      } else {
+        headerBg = 'bg-gradient-to-r from-rose-700 to-rose-800';
+        statusBadge = `<span class="px-2.5 py-1 rounded-full bg-white text-rose-900 text-xs font-extrabold">BOOKED / OCCUPIED</span>`;
+      }
+
+      const timelineHtml = train.stations.map((stn, idx) => {
+        if (idx === train.stations.length - 1) return '';
+        const nextStn = train.stations[idx + 1];
+        const isLegVacant = berth.legVacant[idx];
+
+        return `
+          <div class="flex items-center justify-between py-1.5 px-2.5 rounded-lg text-xs ${
+            isLegVacant
+              ? 'bg-emerald-50 border border-emerald-200 text-emerald-900 font-semibold'
+              : 'bg-rose-50/70 border border-rose-200/70 text-rose-900 font-medium'
+          }">
+            <div class="flex items-center gap-2 font-mono">
+              <span class="w-2 h-2 rounded-full ${isLegVacant ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+              <span>${stn.code} → ${nextStn.code}</span>
+            </div>
+            <span class="text-[11px] uppercase font-extrabold ${isLegVacant ? 'text-emerald-700' : 'text-rose-600'}">
+              ${isLegVacant ? 'Available' : 'Booked (CNF)'}
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      let segmentDetailsHtml = '';
+      if (berth.vacantSegments.length > 0) {
+        const seg = berth.vacantSegments[0];
+        const estFare = calculateDiscountedCurrentFare(berth.classCode, seg.km);
+
+        segmentDetailsHtml = `
+          <div class="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <span class="text-[11px] font-bold uppercase text-slate-400">Open Vacancy Window</span>
+              <span class="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                ${seg.km} km • Est. ₹${estFare}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <div class="text-xs font-mono font-extrabold text-irctc-navy">${seg.fromCode}</div>
+                <div class="text-xs font-semibold text-slate-700">${seg.fromName}</div>
+                <div class="text-[11px] text-slate-400 font-mono">Dep: ${seg.fromDep}</div>
+              </div>
+              <div class="flex flex-col items-center text-orange-500 px-2">
+                <i class="fa-solid fa-arrow-right-long text-base"></i>
+                <span class="text-[10px] font-mono text-slate-400">Vacant</span>
+              </div>
+              <div class="text-right">
+                <div class="text-xs font-mono font-extrabold text-irctc-navy">${seg.toCode}</div>
+                <div class="text-xs font-semibold text-slate-700">${seg.toName}</div>
+                <div class="text-[11px] text-slate-400 font-mono">Arr: ${seg.toArr}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <button
+              onclick="openBookingActionModal('${berth.coachId}', ${berth.berthNo}, 'CURRENT_BOOKING')"
+              class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <i class="fa-solid fa-bolt"></i>
+              <span>Book via IRCTC Current Counter</span>
+            </button>
+            <button
+              onclick="openBookingActionModal('${berth.coachId}', ${berth.berthNo}, 'TTE_REQUEST')"
+              class="w-full py-2.5 px-4 rounded-xl bg-irctc-navy hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <i class="fa-solid fa-id-card-clip text-amber-400"></i>
+              <span>Generate TTE On-Board Allotment Slip</span>
+            </button>
+          </div>
+        `;
+      } else {
+        segmentDetailsHtml = `
+          <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-2">
+            <i class="fa-solid fa-user-lock text-rose-500 text-xl"></i>
+            <div class="text-xs font-extrabold text-rose-900">Seat Booked for Entire Route</div>
+            <p class="text-[11px] text-rose-700">
+              Seat #${berth.berthNo} is allotted to a confirmed passenger from ${train.stations[0].code} to ${train.stations[train.stations.length - 1].code}.
+            </p>
+            <button
+              onclick="jumpToNextVacantInCoach()"
+              class="mt-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer"
+            >
+              Find Next Available Seat in ${coach.id}
+            </button>
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="${headerBg} text-white p-4 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-mono uppercase tracking-wider opacity-90">
+              Coach ${berth.coachId} • Bay ${berth.bay}
+            </span>
+            ${statusBadge}
+          </div>
+          <div class="flex items-baseline justify-between">
+            <h4 class="text-2xl font-extrabold font-mono">Seat #${berth.berthNo}</h4>
+            <span class="text-xs font-bold bg-black/25 px-2.5 py-1 rounded-lg">
+              ${berthMeta.full} (${berth.berthType})
+            </span>
+          </div>
+        </div>
+
+        <div class="p-4 space-y-4">
+          ${segmentDetailsHtml}
+
+          <div>
+            <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-2 flex items-center justify-between">
+              <span>Station-by-Station Chart Status</span>
+              <span class="font-mono text-[10px] text-slate-400">${train.stations.length} Stops</span>
+            </div>
+            <div class="space-y-1 max-h-56 overflow-y-auto pr-1">
+              ${timelineHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /*************************************************************************
+     * 12. COMPLETE SEAT STATUS TABLE (BOOKED + AVAILABLE + EXPORT)
+     *************************************************************************/
+    function renderVacancyTable() {
+      const train = getActiveTrain();
+      const tbody = document.getElementById('vacancyTableBody');
+      const scope = document.getElementById('tableScopeFilter')?.value || 'ACTIVE_COACH';
+      const tableFrom = document.getElementById('tableFromStationFilter')?.value || 'ALL';
+      const tableTo = document.getElementById('tableToStationFilter')?.value || 'ALL';
+
+      let coachesToScan = [];
+      if (scope === 'ACTIVE_COACH') {
+        coachesToScan = [getActiveCoach()];
+      } else {
+        coachesToScan = state.selectedClass === 'ALL'
+          ? train.coaches
+          : train.coaches.filter(c => c.classCode === state.selectedClass);
+      }
+
+      const rows = [];
+      coachesToScan.forEach(coach => {
+        coach.berths.forEach(berth => {
+          if (!doesBerthMatchFilters(berth)) return;
+
+          if (tableFrom !== 'ALL') {
+            const hasFrom = berth.vacantSegments.some(s => s.fromCode === tableFrom);
+            if (!hasFrom) return;
+          }
+          if (tableTo !== 'ALL') {
+            const hasTo = berth.vacantSegments.some(s => s.toCode === tableTo);
+            if (!hasTo) return;
+          }
+          rows.push({ coach, berth });
+        });
+      });
+
+      document.getElementById('tableCountBadge').textContent = rows.length;
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="py-10 px-4 text-center text-slate-500">
+              <div class="flex flex-col items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass text-2xl text-slate-400"></i>
+                <span class="font-bold text-slate-700">No Seats Match Current Filter Criteria</span>
+                <button onclick="resetAllFilters()" class="mt-1 px-3 py-1.5 rounded-lg bg-orange-500 text-white text-xs font-bold cursor-pointer">
+                  Reset All Filters
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(({ berth }) => {
+        const typeMeta = BERTH_TYPE_LABELS[berth.berthType] || { short: berth.berthType, full: berth.berthType, badgeClass: 'bg-slate-100 text-slate-800' };
+        const vacantStr = berth.vacantSegments.length > 0
+          ? berth.vacantSegments.map(s => `${s.fromCode} → ${s.toCode} (${s.km}km)`).join(', ')
+          : 'None';
+        const bookedStr = berth.bookedSegments.length > 0
+          ? berth.bookedSegments.map(s => `${s.fromCode} → ${s.toCode}`).join(', ')
+          : 'None';
+
+        const primaryVacSeg = berth.vacantSegments[0];
+        const fare = primaryVacSeg ? `₹${calculateDiscountedCurrentFare(berth.classCode, primaryVacSeg.km)}` : '—';
+
+        let statusPill = '';
+        if (berth.status === 'FULL') {
+          statusPill = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>AVAILABLE</span>`;
+        } else if (berth.status === 'PARTIAL') {
+          statusPill = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900"><span class="w-2 h-2 rounded-full bg-amber-500"></span>PARTIAL VACANT</span>`;
+        } else {
+          statusPill = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800"><span class="w-2 h-2 rounded-full bg-rose-500"></span>BOOKED</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-orange-50/40 transition">
+            <td class="py-3 px-4 font-mono font-extrabold text-irctc-navy">${berth.coachId} <span class="text-[10px] text-slate-400">(${berth.classCode})</span></td>
+            <td class="py-3 px-4 font-mono font-extrabold text-slate-900">#${berth.berthNo}</td>
+            <td class="py-3 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border ${typeMeta.badgeClass}">
+                ${berth.berthType} • ${typeMeta.full}
+              </span>
+            </td>
+            <td class="py-3 px-4">${statusPill}</td>
+            <td class="py-3 px-4 font-mono text-xs ${berth.vacantSegments.length ? 'text-emerald-700 font-bold' : 'text-slate-400'}">${vacantStr}</td>
+            <td class="py-3 px-4 font-mono text-xs ${berth.bookedSegments.length ? 'text-rose-700 font-semibold' : 'text-slate-400'}">${bookedStr}</td>
+            <td class="py-3 px-4 font-mono font-bold text-slate-800">${fare}</td>
+            <td class="py-3 px-4 text-right whitespace-nowrap space-x-1">
+              <button
+                onclick="jumpToCoachBerth('${berth.coachId}', ${berth.berthNo})"
+                class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition cursor-pointer"
+              >
+                Inspect
+              </button>
+              ${berth.vacantSegments.length > 0 ? `
+                <button
+                  onclick="openBookingActionModal('${berth.coachId}', ${berth.berthNo}, 'TTE_REQUEST')"
+                  class="px-2.5 py-1.5 rounded-lg bg-irctc-navy hover:bg-slate-800 text-white font-semibold text-xs transition cursor-pointer"
+                >
+                  TTE Slip
+                </button>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function jumpToCoachBerth(coachId, berthNo) {
+      state.activeCoachId = coachId;
+      state.selectedBerthNo = berthNo;
+      switchPortalView('visual');
+      refreshChartDisplay();
+    }
+
+    function switchPortalView(viewName) {
+      state.activeView = viewName;
+      const visualContainer = document.getElementById('viewVisualContainer');
+      const tableContainer = document.getElementById('viewTableContainer');
+      const btnVisual = document.getElementById('tabBtnVisual');
+      const btnTable = document.getElementById('tabBtnTable');
+
+      if (viewName === 'visual') {
+        visualContainer.classList.remove('hidden');
+        tableContainer.classList.add('hidden');
+        btnVisual.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer bg-irctc-navy text-white shadow-sm';
+        btnTable.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer text-slate-700 hover:text-slate-900';
+      } else {
+        visualContainer.classList.add('hidden');
+        tableContainer.classList.remove('hidden');
+        btnTable.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer bg-irctc-navy text-white shadow-sm';
+        btnVisual.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer text-slate-700 hover:text-slate-900';
+        renderVacancyTable();
+      }
+    }
+
+    function applyFilters() {
+      state.filterBerthType = document.getElementById('filterBerthType').value;
+      state.filterVacancyType = document.getElementById('filterVacancyType').value;
+      state.searchQuery = document.getElementById('searchBerthInput').value.trim();
+      renderVisualCoachLayout();
+      renderVacancyTable();
+    }
+
+    function resetAllFilters() {
+      state.selectedClass = 'ALL';
+      state.boardingStation = 'ALL';
+      state.destinationStation = 'ALL';
+      state.filterBerthType = 'ALL';
+      state.filterVacancyType = 'ALL';
+      state.searchQuery = '';
+
+      document.getElementById('boardingStation').value = 'ALL';
+      document.getElementById('destinationStation').value = 'ALL';
+      document.getElementById('filterBerthType').value = 'ALL';
+      document.getElementById('filterVacancyType').value = 'ALL';
+      document.getElementById('searchBerthInput').value = '';
+      if (document.getElementById('tableFromStationFilter')) document.getElementById('tableFromStationFilter').value = 'ALL';
+      if (document.getElementById('tableToStationFilter')) document.getElementById('tableToStationFilter').value = 'ALL';
+
+      syncComboboxInputsWithState();
+      recalculateAllBerthStatuses();
+      refreshChartDisplay();
+      showToast('All filters reset to default');
+    }
+
+    /*************************************************************************
+     * 13. BOOKING & TTE ALLOTMENT SLIP MODAL
+     *************************************************************************/
+    function openBookingActionModal(coachId, berthNo, mode) {
+      const train = getActiveTrain();
+      const coach = train.coaches.find(c => c.id === coachId);
+      const berth = coach.berths.find(b => b.berthNo === berthNo);
+      const seg = berth.vacantSegments[0] || {
+        fromCode: train.stations[0].code,
+        fromName: train.stations[0].name,
+        fromDep: train.stations[0].dep,
+        toCode: train.stations[train.stations.length - 1].code,
+        toName: train.stations[train.stations.length - 1].name,
+        toArr: train.stations[train.stations.length - 1].arr,
+        km: 500
+      };
+      const fare = calculateDiscountedCurrentFare(berth.classCode, seg.km);
+      const jDate = state.journeyDate;
+
+      const modal = document.getElementById('actionModal');
+      const titleEl = document.getElementById('actionModalTitle');
+      const bodyEl = document.getElementById('actionModalBody');
+
+      if (mode === 'CURRENT_BOOKING') {
+        titleEl.textContent = 'IRCTC Post-Chart Current Booking Summary';
+        bodyEl.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-1">
+            <div class="font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i>
+              <span>Eligible for Online Current Reservation (CURR_AVBL)</span>
+            </div>
+            <p>Current booking is open at 10% discount on basic fare prior to departure from ${seg.fromName} (${seg.fromCode}).</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2.5 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-500">Train &amp; Journey Date:</span>
+              <span class="font-bold text-slate-900">${train.trainNo} (${jDate})</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Coach &amp; Exact Seat:</span>
+              <span class="font-mono font-extrabold text-orange-600">Coach ${berth.coachId} • Seat #${berth.berthNo} (${berth.berthType})</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Vacant Segment:</span>
+              <span class="font-mono font-bold text-slate-900">${seg.fromName} (${seg.fromCode}) → ${seg.toName} (${seg.toCode})</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-200">
+              <span class="text-slate-600 font-bold">Estimated Current Booking Fare:</span>
+              <span class="font-mono font-extrabold text-base text-emerald-700">₹${fare}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2.5 pt-2">
+            <button onclick="copyTextToClipboard('Train ${train.trainNo} | Date: ${jDate} | Coach ${berth.coachId} Seat #${berth.berthNo} (${berth.berthType}) | Segment: ${seg.fromCode} to ${seg.toCode}')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs cursor-pointer">
+              <i class="fa-regular fa-copy mr-1"></i>Copy Booking Details
+            </button>
+            <button onclick="closeActionModal()" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs cursor-pointer">
+              Done
+            </button>
+          </div>
+        `;
+      } else {
+        titleEl.textContent = 'TTE On-Board Seat Allotment Request Slip';
+        const slipText = `TTE BERTH REQUEST | Train: ${train.trainNo} (${jDate}) | Coach: ${berth.coachId} | Seat: #${berth.berthNo} (${berth.berthType}) | Vacant Segment: ${seg.fromCode} (${seg.fromDep}) -> ${seg.toCode} (${seg.toArr}) | Est. Fare: Rs.${fare}`;
+
+        bodyEl.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
+            Show this post-chart vacancy slip to the Travelling Ticket Examiner (TTE) on board or at the platform chart desk for immediate EFT/HHT seat allotment.
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900 text-white font-mono text-xs space-y-2 border-2 border-dashed border-orange-400/60">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+              <span class="text-orange-400 font-bold">ON-BOARD TTE ALLOTMENT MEMO</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">DATE: ${jDate}</span>
+            </div>
+            <div>TRAIN: <strong>${train.trainNo} ${train.trainName}</strong></div>
+            <div>COACH / SEAT: <strong class="text-amber-300 text-sm">${berth.coachId} / #${berth.berthNo} (${berth.berthType})</strong></div>
+            <div>CLASS: <strong>${berth.classCode} (${CLASS_META[berth.classCode].name})</strong></div>
+            <div>VACANT FROM: <strong>${seg.fromName} (${seg.fromCode}) [${seg.fromDep}]</strong></div>
+            <div>VACANT UP TO: <strong>${seg.toName} (${seg.toCode}) [${seg.toArr}]</strong></div>
+            <div>DISTANCE / EST. EFT FARE: <strong>${seg.km} KM / ₹${fare}</strong></div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2.5 pt-2">
+            <button onclick="copyTextToClipboard('${slipText}')" class="px-4 py-2 rounded-xl bg-irctc-navy hover:bg-slate-800 text-white font-bold text-xs cursor-pointer">
+              <i class="fa-regular fa-copy mr-1.5 text-orange-400"></i>Copy TTE Slip
+            </button>
+            <button onclick="closeActionModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs cursor-pointer">
+              Close
+            </button>
+          </div>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeActionModal() {
+      document.getElementById('actionModal').classList.add('hidden');
+    }
+
+    /*************************************************************************
+     * 14. HOST ONLINE, LIVE API CONFIG & STANDALONE DOWNLOAD TOOLS
+     *************************************************************************/
+    function openHostModal() {
+      document.getElementById('hostModal').classList.remove('hidden');
+    }
+
+    function closeHostModal() {
+      document.getElementById('hostModal').classList.add('hidden');
+    }
+
+    function switchHostModalTab(tab) {
+      const deployContent = document.getElementById('hostTabDeployContent');
+      const apiContent = document.getElementById('hostTabApiContent');
+      const jsonContent = document.getElementById('hostTabJsonContent');
+
+      const deployBtn = document.getElementById('hostTabDeployBtn');
+      const apiBtn = document.getElementById('hostTabApiBtn');
+      const jsonBtn = document.getElementById('hostTabJsonBtn');
+
+      deployContent.classList.add('hidden');
+      apiContent.classList.add('hidden');
+      jsonContent.classList.add('hidden');
+
+      const inactiveClass = 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-200 transition cursor-pointer';
+      const activeClass = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-irctc-navy text-white transition cursor-pointer';
+
+      deployBtn.className = inactiveClass;
+      apiBtn.className = inactiveClass;
+      jsonBtn.className = inactiveClass;
+
+      if (tab === 'deploy') {
+        deployContent.classList.remove('hidden');
+        deployBtn.className = activeClass;
+      } else if (tab === 'api') {
+        apiContent.classList.remove('hidden');
+        apiBtn.className = activeClass;
+      } else {
+        jsonContent.classList.remove('hidden');
+        jsonBtn.className = activeClass;
+      }
+    }
+
+    function saveApiConfig() {
+      state.apiConfig = {
+        mode: document.getElementById('apiEngineModeSelect').value,
+        endpointUrl: document.getElementById('apiEndpointUrlInput').value.trim(),
+        apiKey: document.getElementById('apiKeyInput').value.trim()
+      };
+      try {
+        localStorage.setItem('irctc_fasttrack_api_config', JSON.stringify(state.apiConfig));
+      } catch (e) {}
+      updateEngineBadge();
+      closeHostModal();
+      showToast('Saved API & Engine configuration');
+    }
+
+    function downloadStandalonePortal() {
+      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'index.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Downloaded standalone index.html ready for web hosting!');
+    }
+
+    function exportChartCsv() {
+      const train = getActiveTrain();
+      const lines = ['Coach,Class,SeatNo,BerthType,Status,AvailableSegments,BookedSegments'];
+      train.coaches.forEach(c => {
+        c.berths.forEach(b => {
+          const vac = b.vacantSegments.map(s => `${s.fromCode}->${s.toCode}`).join(' | ') || 'None';
+          const bkd = b.bookedSegments.map(s => `${s.fromCode}->${s.toCode}`).join(' | ') || 'None';
+          lines.push(`${b.coachId},${b.classCode},${b.berthNo},${b.berthType},${b.status},"${vac}","${bkd}"`);
+        });
+      });
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `IRCTC_Chart_${train.trainNo}_${state.journeyDate}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Exported CSV for Train ${train.trainNo}`);
+    }
+
+    function populateSampleCustomJson() {
+      const samplePayload = {
+        trainNo: "12951",
+        trainName: "MUMBAI CENTRAL - NEW DELHI RAJDHANI EXP",
+        typeTag: "CUSTOM JSON",
+        stations: [
+          { code: "MMCT", name: "Mumbai Central", dep: "17:00", arr: "Origin", km: 0 },
+          { code: "ST", name: "Surat", dep: "19:48", arr: "19:43", km: 263 },
+          { code: "BRC", name: "Vadodara Jn", dep: "21:16", arr: "21:06", km: 392 },
+          { code: "KOTA", name: "Kota Jn", dep: "03:20", arr: "03:10", km: 920 },
+          { code: "NDLS", name: "New Delhi", dep: "Dest", arr: "08:32", km: 1384 }
+        ],
+        coaches: [
+          { id: "B1", classCode: "3A" },
+          { id: "A1", classCode: "2A" },
+          { id: "H1", classCode: "1A" }
+        ]
+      };
+      document.getElementById('customJsonTextarea').value = JSON.stringify(samplePayload, null, 2);
+    }
+
+    function importCustomChartJson() {
+      const raw = document.getElementById('customJsonTextarea').value;
+      const feedback = document.getElementById('jsonImportFeedback');
+
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed.trainNo || !Array.isArray(parsed.stations) || !Array.isArray(parsed.coaches)) {
+          throw new Error('JSON must include trainNo, stations array, and coaches array.');
+        }
+        window.loadExternalChartData(parsed);
+        feedback.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300';
+        feedback.textContent = `Successfully imported chart for ${parsed.trainNo} - ${parsed.trainName}!`;
+        feedback.classList.remove('hidden');
+
+        setTimeout(() => {
+          feedback.classList.add('hidden');
+          closeHostModal();
+        }, 700);
+      } catch (err) {
+        feedback.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold bg-red-100 text-red-800 border border-red-300';
+        feedback.textContent = `JSON Parse Error: ${err.message}`;
+        feedback.classList.remove('hidden');
+      }
+    }
+
+    window.loadExternalChartData = function (payload) {
+      const seed = computeDateSeed(payload.trainNo, state.journeyDate);
+      payload.coaches.forEach((coach, idx) => {
+        if (!coach.berths) {
+          coach.berths = buildCoachBerths(coach.id, coach.classCode || '3A', payload.stations, seed, idx + 1);
+        }
+      });
+
+      state.activeTrainObj = {
+        trainNo: payload.trainNo,
+        trainName: payload.trainName || 'CUSTOM CHART TRAIN',
+        typeTag: payload.typeTag || 'CUSTOM',
+        depHour: 17,
+        dateStr: state.journeyDate,
+        seed,
+        stations: payload.stations,
+        coaches: payload.coaches
+      };
+
+      document.getElementById('trainNumberInput').value = payload.trainNo;
+      state.activeCoachId = payload.coaches[0].id;
+      state.selectedBerthNo = 1;
+      populateStationDropdowns(state.activeTrainObj);
+      recalculateAllBerthStatuses();
+      refreshChartDisplay();
+      showToast(`Loaded chart data for ${payload.trainNo}`);
+    };
+
+    /*************************************************************************
+     * 15. CLIPBOARD & TOAST UTILITIES
+     *************************************************************************/
+    function copyVacantTableReport() {
+      const train = getActiveTrain();
+      const coach = getActiveCoach();
+      const vacantBerths = coach.berths.filter(b => b.status !== 'BOOKED');
+      const lines = [
+        `IRCTC POST-CHART SEAT REPORT — ${train.trainNo} ${train.trainName} (${state.journeyDate})`,
+        `Coach: ${coach.id} (${coach.classCode}) | Available/Partial Seats: ${vacantBerths.length}`,
+        `-------------------------------------------------------------------------`
+      ];
+      vacantBerths.forEach(b => {
+        const segs = b.vacantSegments.map(s => `${s.fromCode}->${s.toCode}`).join(', ');
+        lines.push(`Seat #${b.berthNo} (${b.berthType}) - ${b.status}: Vacant [${segs}]`);
+      });
+      copyTextToClipboard(lines.join('\n'));
+    }
+
+    function copyTextToClipboard(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
+      } catch (err) {
+        showToast('Unable to copy text');
+      }
+      document.body.removeChild(ta);
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const banner = document.getElementById('toastBanner');
+      const textEl = document.getElementById('toastMessage');
+      if (!banner || !textEl) return;
+      textEl.textContent = msg;
+      banner.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 3200);
+    }
+  </script>
+</body>
+</html>
